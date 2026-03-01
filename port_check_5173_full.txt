@@ -1,0 +1,691 @@
+﻿
+
+State                    : Fi
+                           nW
+                           ai
+                           t2
+AppliedSetting           : In
+                           te
+                           rn
+                           et
+OffloadState             : In
+                           Ho
+                           st
+Caption                  : 
+Description              : 
+ElementName              : 
+InstanceID               : ::
+                           1+
+                           +5
+                           17
+                           3+
+                           +:
+                           :1
+                           ++
+                           64
+                           22
+                           3
+CommunicationStatus      : 
+DetailedStatus           : 
+HealthState              : 
+InstallDate              : 
+Name                     : 
+OperatingStatus          : 
+OperationalStatus        : 
+PrimaryStatus            : 
+Status                   : 
+StatusDescriptions       : 
+AvailableRequestedStates : 
+EnabledDefault           : 2
+EnabledState             : 
+OtherEnabledState        : 
+RequestedState           : 5
+TimeOfLastStateChange    : 
+TransitioningToState     : 12
+AggregationBehavior      : 
+Directionality           : 
+CreationTime             : 27
+                           -0
+                           2-
+                           20
+                           26
+                            1
+                           9:
+                           45
+                           :3
+                           1
+LocalAddress             : ::
+                           1
+LocalPort                : 51
+                           73
+OwningProcess            : 19
+                           40
+                           0
+RemoteAddress            : ::
+                           1
+RemotePort               : 64
+                           22
+                           3
+PSComputerName           : 
+CimClass                 : RO
+                           OT
+                           /S
+                           ta
+                           nd
+                           ar
+                           dC
+                           im
+                           v2
+                           :M
+                           SF
+                           T_
+                           Ne
+                           tT
+                           CP
+                           Co
+                           nn
+                           ec
+                           ti
+                           on
+CimInstanceProperties    : {C
+                           ap
+                           ti
+                           on
+                           , 
+                           De
+                           sc
+                           ri
+                           pt
+                           io
+                           n,
+                            E
+                           le
+                           me
+                           nt
+                           Na
+                           me
+                           , 
+                           In
+                           st
+                           an
+                           ce
+                           ID
+                           ..
+                           .}
+CimSystemProperties      : Mi
+                           cr
+                           os
+                           of
+                           t.
+                           Ma
+                           na
+                           ge
+                           me
+                           nt
+                           .I
+                           nf
+                           ra
+                           st
+                           ru
+                           ct
+                           ur
+                           e.
+                           Ci
+                           mS
+                           ys
+                           te
+                           mP
+                           ro
+                           pe
+                           rt
+                           ie
+                           s
+
+State                    : Ti
+                           me
+                           Wa
+                           it
+AppliedSetting           : 
+OffloadState             : In
+                           Ho
+                           st
+Caption                  : 
+Description              : 
+ElementName              : 
+InstanceID               : ::
+                           1+
+                           +5
+                           17
+                           3+
+                           +:
+                           :1
+                           ++
+                           59
+                           80
+                           8
+CommunicationStatus      : 
+DetailedStatus           : 
+HealthState              : 
+InstallDate              : 
+Name                     : 
+OperatingStatus          : 
+OperationalStatus        : 
+PrimaryStatus            : 
+Status                   : 
+StatusDescriptions       : 
+AvailableRequestedStates : 
+EnabledDefault           : 2
+EnabledState             : 
+OtherEnabledState        : 
+RequestedState           : 5
+TimeOfLastStateChange    : 
+TransitioningToState     : 12
+AggregationBehavior      : 
+Directionality           : 
+CreationTime             : 01
+                           -0
+                           1-
+                           16
+                           01
+                            0
+                           5:
+                           30
+                           :0
+                           0
+LocalAddress             : ::
+                           1
+LocalPort                : 51
+                           73
+OwningProcess            : 0
+RemoteAddress            : ::
+                           1
+RemotePort               : 59
+                           80
+                           8
+PSComputerName           : 
+CimClass                 : RO
+                           OT
+                           /S
+                           ta
+                           nd
+                           ar
+                           dC
+                           im
+                           v2
+                           :M
+                           SF
+                           T_
+                           Ne
+                           tT
+                           CP
+                           Co
+                           nn
+                           ec
+                           ti
+                           on
+CimInstanceProperties    : {C
+                           ap
+                           ti
+                           on
+                           , 
+                           De
+                           sc
+                           ri
+                           pt
+                           io
+                           n,
+                            E
+                           le
+                           me
+                           nt
+                           Na
+                           me
+                           , 
+                           In
+                           st
+                           an
+                           ce
+                           ID
+                           ..
+                           .}
+CimSystemProperties      : Mi
+                           cr
+                           os
+                           of
+                           t.
+                           Ma
+                           na
+                           ge
+                           me
+                           nt
+                           .I
+                           nf
+                           ra
+                           st
+                           ru
+                           ct
+                           ur
+                           e.
+                           Ci
+                           mS
+                           ys
+                           te
+                           mP
+                           ro
+                           pe
+                           rt
+                           ie
+                           s
+
+State                    : Ti
+                           me
+                           Wa
+                           it
+AppliedSetting           : 
+OffloadState             : In
+                           Ho
+                           st
+Caption                  : 
+Description              : 
+ElementName              : 
+InstanceID               : ::
+                           1+
+                           +5
+                           17
+                           3+
+                           +:
+                           :1
+                           ++
+                           53
+                           50
+                           0
+CommunicationStatus      : 
+DetailedStatus           : 
+HealthState              : 
+InstallDate              : 
+Name                     : 
+OperatingStatus          : 
+OperationalStatus        : 
+PrimaryStatus            : 
+Status                   : 
+StatusDescriptions       : 
+AvailableRequestedStates : 
+EnabledDefault           : 2
+EnabledState             : 
+OtherEnabledState        : 
+RequestedState           : 5
+TimeOfLastStateChange    : 
+TransitioningToState     : 12
+AggregationBehavior      : 
+Directionality           : 
+CreationTime             : 01
+                           -0
+                           1-
+                           16
+                           01
+                            0
+                           5:
+                           30
+                           :0
+                           0
+LocalAddress             : ::
+                           1
+LocalPort                : 51
+                           73
+OwningProcess            : 0
+RemoteAddress            : ::
+                           1
+RemotePort               : 53
+                           50
+                           0
+PSComputerName           : 
+CimClass                 : RO
+                           OT
+                           /S
+                           ta
+                           nd
+                           ar
+                           dC
+                           im
+                           v2
+                           :M
+                           SF
+                           T_
+                           Ne
+                           tT
+                           CP
+                           Co
+                           nn
+                           ec
+                           ti
+                           on
+CimInstanceProperties    : {C
+                           ap
+                           ti
+                           on
+                           , 
+                           De
+                           sc
+                           ri
+                           pt
+                           io
+                           n,
+                            E
+                           le
+                           me
+                           nt
+                           Na
+                           me
+                           , 
+                           In
+                           st
+                           an
+                           ce
+                           ID
+                           ..
+                           .}
+CimSystemProperties      : Mi
+                           cr
+                           os
+                           of
+                           t.
+                           Ma
+                           na
+                           ge
+                           me
+                           nt
+                           .I
+                           nf
+                           ra
+                           st
+                           ru
+                           ct
+                           ur
+                           e.
+                           Ci
+                           mS
+                           ys
+                           te
+                           mP
+                           ro
+                           pe
+                           rt
+                           ie
+                           s
+
+State                    : Es
+                           ta
+                           bl
+                           is
+                           he
+                           d
+AppliedSetting           : In
+                           te
+                           rn
+                           et
+OffloadState             : In
+                           Ho
+                           st
+Caption                  : 
+Description              : 
+ElementName              : 
+InstanceID               : ::
+                           1+
+                           +5
+                           17
+                           3+
+                           +:
+                           :1
+                           ++
+                           53
+                           20
+                           7
+CommunicationStatus      : 
+DetailedStatus           : 
+HealthState              : 
+InstallDate              : 
+Name                     : 
+OperatingStatus          : 
+OperationalStatus        : 
+PrimaryStatus            : 
+Status                   : 
+StatusDescriptions       : 
+AvailableRequestedStates : 
+EnabledDefault           : 2
+EnabledState             : 
+OtherEnabledState        : 
+RequestedState           : 5
+TimeOfLastStateChange    : 
+TransitioningToState     : 12
+AggregationBehavior      : 
+Directionality           : 
+CreationTime             : 27
+                           -0
+                           2-
+                           20
+                           26
+                            1
+                           9:
+                           36
+                           :1
+                           4
+LocalAddress             : ::
+                           1
+LocalPort                : 51
+                           73
+OwningProcess            : 19
+                           40
+                           0
+RemoteAddress            : ::
+                           1
+RemotePort               : 53
+                           20
+                           7
+PSComputerName           : 
+CimClass                 : RO
+                           OT
+                           /S
+                           ta
+                           nd
+                           ar
+                           dC
+                           im
+                           v2
+                           :M
+                           SF
+                           T_
+                           Ne
+                           tT
+                           CP
+                           Co
+                           nn
+                           ec
+                           ti
+                           on
+CimInstanceProperties    : {C
+                           ap
+                           ti
+                           on
+                           , 
+                           De
+                           sc
+                           ri
+                           pt
+                           io
+                           n,
+                            E
+                           le
+                           me
+                           nt
+                           Na
+                           me
+                           , 
+                           In
+                           st
+                           an
+                           ce
+                           ID
+                           ..
+                           .}
+CimSystemProperties      : Mi
+                           cr
+                           os
+                           of
+                           t.
+                           Ma
+                           na
+                           ge
+                           me
+                           nt
+                           .I
+                           nf
+                           ra
+                           st
+                           ru
+                           ct
+                           ur
+                           e.
+                           Ci
+                           mS
+                           ys
+                           te
+                           mP
+                           ro
+                           pe
+                           rt
+                           ie
+                           s
+
+State                    : Li
+                           st
+                           en
+AppliedSetting           : 
+OffloadState             : In
+                           Ho
+                           st
+Caption                  : 
+Description              : 
+ElementName              : 
+InstanceID               : ::
+                           1+
+                           +5
+                           17
+                           3+
+                           +:
+                           :+
+                           +0
+CommunicationStatus      : 
+DetailedStatus           : 
+HealthState              : 
+InstallDate              : 
+Name                     : 
+OperatingStatus          : 
+OperationalStatus        : 
+PrimaryStatus            : 
+Status                   : 
+StatusDescriptions       : 
+AvailableRequestedStates : 
+EnabledDefault           : 2
+EnabledState             : 
+OtherEnabledState        : 
+RequestedState           : 5
+TimeOfLastStateChange    : 
+TransitioningToState     : 12
+AggregationBehavior      : 
+Directionality           : 
+CreationTime             : 27
+                           -0
+                           2-
+                           20
+                           26
+                            1
+                           9:
+                           35
+                           :4
+                           0
+LocalAddress             : ::
+                           1
+LocalPort                : 51
+                           73
+OwningProcess            : 19
+                           40
+                           0
+RemoteAddress            : ::
+RemotePort               : 0
+PSComputerName           : 
+CimClass                 : RO
+                           OT
+                           /S
+                           ta
+                           nd
+                           ar
+                           dC
+                           im
+                           v2
+                           :M
+                           SF
+                           T_
+                           Ne
+                           tT
+                           CP
+                           Co
+                           nn
+                           ec
+                           ti
+                           on
+CimInstanceProperties    : {C
+                           ap
+                           ti
+                           on
+                           , 
+                           De
+                           sc
+                           ri
+                           pt
+                           io
+                           n,
+                            E
+                           le
+                           me
+                           nt
+                           Na
+                           me
+                           , 
+                           In
+                           st
+                           an
+                           ce
+                           ID
+                           ..
+                           .}
+CimSystemProperties      : Mi
+                           cr
+                           os
+                           of
+                           t.
+                           Ma
+                           na
+                           ge
+                           me
+                           nt
+                           .I
+                           nf
+                           ra
+                           st
+                           ru
+                           ct
+                           ur
+                           e.
+                           Ci
+                           mS
+                           ys
+                           te
+                           mP
+                           ro
+                           pe
+                           rt
+                           ie
+                           s
+
+
+
