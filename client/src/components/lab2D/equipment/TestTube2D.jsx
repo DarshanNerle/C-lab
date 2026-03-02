@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { interpolateRgb } from 'd3-interpolate';
 import { drawGlassReflections } from '../engine/LiquidRenderer';
 import useLabStore from '../../../store/useLabStore';
+import { CHEMISTRY_DATABASE } from '../../../constants/chemistryData';
+import { getMixtureVisualProfile } from '../../../utils/chemicalColorSystem';
 
 import { soundManager } from '../../../utils/soundManager';
 
@@ -48,6 +50,10 @@ export default function TestTube2D({
         const targetColor = mixture?.color || "rgba(255,255,255,0)";
         const temp = mixture?.temp || 25;
         const heat = Math.max(0, Math.min(1, (temp - 25) / 60));
+        const visualProfile = getMixtureVisualProfile((mixture?.components || []).map((component) => ({
+            volume: component.volume,
+            data: CHEMISTRY_DATABASE[component.id]
+        })), activeReaction?.type);
 
         // Setup initial color state to avoid jump on first load
         if (!currentColorRef.current) {
@@ -88,7 +94,7 @@ export default function TestTube2D({
 
                 ctx.save();
                 ctx.shadowBlur = 10;
-                ctx.shadowColor = color;
+                ctx.shadowColor = visualProfile.glow;
 
                 ctx.beginPath();
                 ctx.moveTo(3, liqY);
@@ -100,22 +106,31 @@ export default function TestTube2D({
                 ctx.arc(radius, height - radius, radius - 3, 0, Math.PI);
                 ctx.lineTo(3, liqY);
                 ctx.closePath();
-                ctx.fillStyle = color;
+                const liquidGradient = ctx.createLinearGradient(0, liqY, 0, height);
+                liquidGradient.addColorStop(0, visualProfile.top);
+                liquidGradient.addColorStop(0.48, color);
+                liquidGradient.addColorStop(1, visualProfile.bottom);
+                ctx.fillStyle = liquidGradient;
                 ctx.fill();
 
                 // Depth
                 ctx.globalCompositeOperation = 'source-atop';
                 const grad = ctx.createLinearGradient(0, liqY, 0, height);
-                grad.addColorStop(0, "rgba(255,255,255,0.2)");
+                grad.addColorStop(0, visualProfile.surfaceHighlight);
                 grad.addColorStop(1, "rgba(0,0,0,0.3)");
                 ctx.fillStyle = grad;
                 ctx.fill();
                 ctx.globalCompositeOperation = 'source-over';
 
+                ctx.globalAlpha = 0.22;
+                ctx.fillStyle = visualProfile.surfaceHighlight;
+                ctx.fillRect(6, liqY + 1, Math.max(8, width * 0.26), Math.max(2, liquidH * 0.2));
+                ctx.globalAlpha = 1;
+
                 if (isBubbling) {
                     ctx.shadowBlur = 4;
-                    ctx.shadowColor = "#ffffff";
-                    ctx.fillStyle = "rgba(255,255,255,0.4)";
+                    ctx.shadowColor = visualProfile.bubble;
+                    ctx.fillStyle = visualProfile.bubble;
                     const intensity = (vfxType.includes("vigorous") ? 6 : 4) + Math.round(heat * 4);
                     for (let i = 0; i < intensity; i++) {
                         const bx = 5 + ((i * 10) % (width - 10));

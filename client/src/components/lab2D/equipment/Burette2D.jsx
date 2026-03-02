@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { interpolateRgb } from 'd3-interpolate';
 import { drawGlassReflections } from '../engine/LiquidRenderer';
 import useLabStore from '../../../store/useLabStore';
+import { CHEMISTRY_DATABASE } from '../../../constants/chemistryData';
+import { getMixtureVisualProfile } from '../../../utils/chemicalColorSystem';
 
 export default function Burette2D({
     id = "burette1",
@@ -44,6 +46,10 @@ export default function Burette2D({
         const currentVol = Math.max(0, Math.min(mixture?.volume || 0, maxVol));
         const fillRatio = currentVol / maxVol;
         const targetColor = mixture?.color || "rgba(255,255,255,0)";
+        const visualProfile = getMixtureVisualProfile((mixture?.components || []).map((component) => ({
+            volume: component.volume,
+            data: CHEMISTRY_DATABASE[component.id]
+        })));
 
         // Setup initial color state to avoid jump on first load
         if (!currentColorRef.current) {
@@ -73,8 +79,12 @@ export default function Burette2D({
 
                 ctx.save();
                 ctx.shadowBlur = 10;
-                ctx.shadowColor = color;
-                ctx.fillStyle = color;
+                ctx.shadowColor = visualProfile.glow;
+                const liquidGradient = ctx.createLinearGradient(0, liqY, 0, liqY + liqH);
+                liquidGradient.addColorStop(0, visualProfile.top);
+                liquidGradient.addColorStop(0.5, color);
+                liquidGradient.addColorStop(1, visualProfile.bottom);
+                ctx.fillStyle = liquidGradient;
                 ctx.fillRect(10, liqY, width - 20, liqH);
 
                 // Meniscus wave (tiny for burette)
@@ -125,8 +135,8 @@ export default function Burette2D({
                 const dropY = (time * 4) % 80;
                 dCtx.save();
                 dCtx.shadowBlur = 8;
-                dCtx.shadowColor = color;
-                dCtx.fillStyle = color;
+                dCtx.shadowColor = visualProfile.glow;
+                dCtx.fillStyle = visualProfile.mid;
                 dCtx.beginPath();
                 dCtx.arc(20, dropY, 3, 0, Math.PI * 2);
                 dCtx.moveTo(17, dropY);

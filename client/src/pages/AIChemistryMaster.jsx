@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/useAuthStore';
 import useAIStore from '../store/useAIStore';
 import useVoiceStore from '../store/useVoiceStore';
+import useLabStore from '../store/useLabStore';
 import { AIController } from '../modules/teaching/AIController';
 import GlassCard from '../components/ui/GlassCard';
 import { voiceManager } from '../utils/VoiceManager';
@@ -45,6 +46,7 @@ const AIChemistryMaster = () => {
         isTeacher,
         isAdmin
     } = useAuthStore();
+    const { actionTimeline } = useLabStore();
 
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -52,6 +54,10 @@ const AIChemistryMaster = () => {
     const [isListening, setIsListening] = useState(false);
     const [micError, setMicError] = useState('');
     const [selectedMode, setSelectedMode] = useState('learn'); // 'learn' | 'quiz' | 'revision' | 'teacher_tools'
+    const [aiPersonality, setAIPersonality] = useState('Friendly Tutor');
+    const [explanationDepth, setExplanationDepth] = useState('Medium');
+    const [voiceMood, setVoiceMood] = useState('Professional');
+    const [studyPreset, setStudyPreset] = useState('Standard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const chatEndRef = useRef(null);
     const { voiceEnabled, speechRate, speechPitch, selectedVoice, voiceGender, isSpeaking, setIsSpeaking, toggleVoice } = useVoiceStore();
@@ -136,9 +142,19 @@ const AIChemistryMaster = () => {
 
         const userEmail = useAuthStore.getState().user?.email || null;
 
+        const recentLabMemory = actionTimeline.slice(-4).map((step) => `${step.type}:${step.containerId || step.targetId || ''}`).join(', ');
+        const composedInput = [
+            `AI Personality: ${aiPersonality}.`,
+            `Study Preset: ${studyPreset}.`,
+            `Explanation Depth: ${explanationDepth}.`,
+            `Voice Mood: ${voiceMood}.`,
+            recentLabMemory ? `Recent Lab Context: ${recentLabMemory}.` : '',
+            `User Prompt: ${currentInput}`
+        ].filter(Boolean).join(' ');
+
         try {
             const response = await AIController.sendMessage({
-                message: currentInput,
+                message: composedInput,
                 context: currentTopic,
                 level: userLevel,
                 mode: 'full_learning',
@@ -254,6 +270,62 @@ const AIChemistryMaster = () => {
                                 <span className="font-medium text-sm">Instructor Tools</span>
                             </button>
                         )}
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500">AI Personality</label>
+                    <select
+                        value={aiPersonality}
+                        onChange={(e) => setAIPersonality(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500"
+                    >
+                        <option>Friendly Tutor</option>
+                        <option>Strict Teacher</option>
+                        <option>Scientific Expert</option>
+                    </select>
+                </div>
+
+                <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Study Preset</label>
+                    <select
+                        value={studyPreset}
+                        onChange={(e) => setStudyPreset(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500"
+                    >
+                        <option>Standard</option>
+                        <option>Explain Like I&apos;m 12</option>
+                        <option>Exam Mode</option>
+                        <option>Step-by-Step Mode</option>
+                    </select>
+                </div>
+
+                <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Explanation Depth</label>
+                    <input
+                        type="range"
+                        min="1"
+                        max="3"
+                        step="1"
+                        value={explanationDepth === 'Short' ? 1 : explanationDepth === 'Medium' ? 2 : 3}
+                        onChange={(e) => setExplanationDepth(Number(e.target.value) === 1 ? 'Short' : Number(e.target.value) === 2 ? 'Medium' : 'Detailed')}
+                        className="w-full accent-purple-500"
+                    />
+                    <p className="text-xs text-slate-400">{explanationDepth}</p>
+                </div>
+
+                <div className="space-y-3">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Voice Mood</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {['Calm', 'Energetic', 'Professional'].map((mood) => (
+                            <button
+                                key={mood}
+                                onClick={() => setVoiceMood(mood)}
+                                className={`rounded-lg px-2 py-2 text-xs transition ${voiceMood === mood ? 'bg-purple-600 text-white' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'}`}
+                            >
+                                {mood}
+                            </button>
+                        ))}
                     </div>
                 </div>
 

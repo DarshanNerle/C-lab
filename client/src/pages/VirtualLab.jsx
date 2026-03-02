@@ -11,14 +11,17 @@ import LabScene from '../components/lab3D/LabScene'
 import GuidedExperimentHUD from '../components/teaching/GuidedExperimentHUD'
 import SafetyWarningModal from '../components/ui/SafetyWarningModal'
 import PredictionOverlay from '../components/quiz/PredictionOverlay'
+import LabEnhancementsHUD from '../components/ui/LabEnhancementsHUD'
 import { CHEMISTRY_DATABASE } from '../constants/chemistryData'
 
 export default function VirtualLab() {
-    const { level, rank, xp, addXP, discoverReaction } = useGameStore()
+    const { level, rank, xp, addXP, discoverReaction, addBadge } = useGameStore()
     const { profile } = useAuthStore()
     const { containers, activeReaction, safetyWarning, clearSafetyWarning, addChemical, resetLab, currentLesson } = useLabStore()
     
     const [pendingChem, setPendingChem] = useState(null);
+    const [lastReaction, setLastReaction] = useState(null);
+    const [sessionStartedAt] = useState(() => Date.now());
 
     // We target beaker1 for the 3D chamber visualization
     const chamber = containers.beaker1;
@@ -50,8 +53,12 @@ export default function VirtualLab() {
         if (activeReaction && activeReaction.xp) {
             addXP(activeReaction.xp);
             if (activeReaction.id) discoverReaction(activeReaction.id);
+            setLastReaction(activeReaction);
+            addBadge('First 3D Experiment');
+            if (activeReaction.xp >= 100) addBadge('Perfect Score');
+            if (Date.now() - sessionStartedAt < 90000) addBadge('Fast Completion');
         }
-    }, [activeReaction, addXP, discoverReaction]);
+    }, [activeReaction, addXP, discoverReaction, addBadge, sessionStartedAt]);
 
     return (
         <div className="w-full h-screen flex flex-col bg-lab-dark overflow-hidden">
@@ -59,6 +66,15 @@ export default function VirtualLab() {
             <div className="absolute top-24 left-6 z-40 w-80 pointer-events-auto">
                 <GuidedExperimentHUD />
             </div>
+            <LabEnhancementsHUD
+                contextKey="lab3d"
+                reaction={lastReaction || activeReaction}
+                onReplay={() => {
+                    if (lastReaction) {
+                        useLabStore.setState({ activeReaction: lastReaction });
+                    }
+                }}
+            />
 
             {/* Safety Warning Modal */}
             <SafetyWarningModal 
@@ -143,7 +159,7 @@ export default function VirtualLab() {
             </main>
 
             {/* Bottom Chemical Rack - Responsive Grid */}
-            <footer className="h-auto md:h-44 w-full bg-black/40 backdrop-blur-2xl border-t border-white/10 z-50 p-6 flex flex-col md:flex-row items-center gap-6 shrink-0">
+            <footer className="lab-table-surface h-auto md:h-44 w-full backdrop-blur-2xl z-50 p-6 flex flex-col md:flex-row items-center gap-6 shrink-0">
                 <div className="flex flex-col md:flex-row items-center gap-6 w-full max-w-7xl mx-auto overflow-hidden">
                     <div className="flex items-center gap-4 shrink-0 border-r border-white/5 pr-6 hidden md:flex">
                         <div className="p-3 bg-neon-cyan/10 rounded-2xl">

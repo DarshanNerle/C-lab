@@ -21,6 +21,7 @@ import useAuthStore from '../store/useAuthStore';
 import ProfileDropdown from '../components/ui/ProfileDropdown';
 import { logoutUser } from '../firebase/auth';
 import LabAnalyticsPanel from '../components/lab2D/LabAnalyticsPanel';
+import LabEnhancementsHUD from '../components/ui/LabEnhancementsHUD';
 import {
     FlaskConical, RefreshCw, Database, ArrowLeft, Book, X,
     Activity, Droplets, Brain, BookOpen, PlayCircle, Info, Undo2
@@ -66,9 +67,11 @@ export default function VirtualLab2D() {
     const navigate = useNavigate();
 
 
-    const { addXP, discoverReaction } = useGameStore();
+    const { addXP, discoverReaction, addBadge } = useGameStore();
 
     const [selectedContainer, setSelectedContainer] = useState('flask1');
+    const [lastReaction, setLastReaction] = useState(null);
+    const [sessionStartedAt] = useState(() => Date.now());
     const [pourAmount, setPourAmount] = useState(10);
     const [showTelemetry, setShowTelemetry] = useState(false);
     const [draggedSource, setDraggedSource] = useState(null);
@@ -169,8 +172,11 @@ export default function VirtualLab2D() {
         if (activeReaction && activeReaction.xp) {
             addXP(activeReaction.xp);
             if (activeReaction.id) discoverReaction(activeReaction.id);
+            setLastReaction(activeReaction);
+            if (activeReaction.xp >= 100) addBadge('Perfect Score');
+            if (Date.now() - sessionStartedAt < 90000) addBadge('Fast Completion');
         }
-    }, [activeReaction]);
+    }, [activeReaction, addXP, discoverReaction, addBadge, sessionStartedAt]);
 
     // Titration Endpoint Detection
     useEffect(() => {
@@ -268,6 +274,14 @@ export default function VirtualLab2D() {
             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-600/10 blur-[120px] rounded-full animate-pulse" />
 
             {/* ── Header ─────────────────────────────────────────────────────── */}
+                        <LabEnhancementsHUD
+                contextKey="lab2d"
+                reaction={lastReaction || activeReaction}
+                onReplay={() => {
+                    if (lastReaction) useLabStore.setState({ activeReaction: lastReaction });
+                }}
+            />
+
             <header className="relative z-50 p-4 md:p-6 flex justify-between items-center bg-black/40 backdrop-blur-md border-b border-white/5 shadow-2xl">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                     <div className="flex items-center gap-3 md:gap-6">
@@ -376,6 +390,7 @@ export default function VirtualLab2D() {
 
             {/* ── Main Layout ─────────────────────────────────────────────────── */}
             <main className="flex-1 flex min-h-0 relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(59,130,246,0.12),transparent_55%)] animate-pulse" />
 
                 {/* ── Left Sidebar ──────────────────────────────────────────────── */}
                 <aside className={`
@@ -818,6 +833,18 @@ export default function VirtualLab2D() {
                         </motion.div>
                     )}
 
+                    {activeReaction && (
+                        <div className="pointer-events-none absolute inset-x-0 top-20 z-[90] flex justify-center gap-2">
+                            {Array.from({ length: 10 }).map((_, index) => (
+                                <span
+                                    key={index}
+                                    className="h-1.5 w-1.5 rounded-full bg-cyan-300/80 shadow-[0_0_8px_rgba(56,189,248,0.9)] animate-[ping_1200ms_ease-out_infinite]"
+                                    style={{ animationDelay: `${index * 90}ms` }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Titration Summary Overlay */}
                     {titrationSession.isCompleted && (
                         <motion.div
@@ -864,7 +891,7 @@ export default function VirtualLab2D() {
             </main>
 
             {/* ── Chemical Fabricator Footer ─────────────────────────────────── */}
-            <footer className="h-44 md:h-48 w-full bg-black/40 backdrop-blur-2xl border-t border-white/10 z-40 p-4 md:p-6 flex flex-col gap-4 shrink-0">
+            <footer className="lab-table-surface h-44 md:h-48 w-full backdrop-blur-2xl z-40 p-4 md:p-6 flex flex-col gap-4 shrink-0">
                 <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
                     <div className="flex items-center gap-4 md:gap-10">
                         <div className="hidden sm:flex items-center gap-4 text-white/40">
@@ -931,3 +958,5 @@ export default function VirtualLab2D() {
         </div>
     );
 }
+
+

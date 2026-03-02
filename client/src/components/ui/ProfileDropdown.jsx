@@ -173,7 +173,7 @@ export default function ProfileDropdown() {
                             </button>
 
                             <button
-                                onClick={() => { setIsOpen(false); navigate('/profile'); }}
+                                onClick={() => { setIsOpen(false); navigate('/profile/edit'); }}
                                 className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl transition-all group"
                             >
                                 <User size={16} className="text-slate-500 group-hover:text-blue-400" />
@@ -209,3 +209,4 @@ export default function ProfileDropdown() {
         </div>
     );
 }
+

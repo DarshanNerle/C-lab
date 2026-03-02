@@ -2,6 +2,7 @@ import { CHEMISTRY_DATABASE, REACTION_RULES } from '../constants/chemistryData';
 import { chemicalsData } from '../constants/chemicalsData';
 import { interpolateRgb } from 'd3-interpolate';
 import { color as d3Color } from 'd3-color';
+import { getMixtureVisualProfile, profileToColor } from '../utils/chemicalColorSystem';
 
 /**
  * Universal Engine for C-Lab 6.0
@@ -62,7 +63,11 @@ export const mixUniversal = (currentMixture, addChemId, addVolmL, addTempC = 25)
         color: (chemicalsData.find(cd => cd.id === c.id) || CHEMISTRY_DATABASE[c.id])?.originalColor || "rgba(255,255,255,0.1)"
     }));
     
-    let finalColor = blendColors(substances);
+    const visualProfile = getMixtureVisualProfile(newComponents.map((component) => ({
+        volume: component.volume,
+        data: CHEMISTRY_DATABASE[component.id]
+    })));
+    let finalColor = profileToColor(visualProfile, 0.68);
 
     // Indicator Logic
     const indicator = newComponents.find(c => c.id === 'phenolphthalein');
@@ -128,7 +133,11 @@ export const processUniversalReaction = (mixture) => {
         color: (chemicalsData.find(cd => cd.id === c.id) || CHEMISTRY_DATABASE[c.id])?.reactionColor || "rgba(255,255,255,0.1)"
     }));
     
-    let finalColor = blendColors(substances);
+    const reactionProfile = getMixtureVisualProfile(finalComponents.map((component) => ({
+        volume: component.volume,
+        data: CHEMISTRY_DATABASE[component.id]
+    })), matchedRule.type);
+    let finalColor = profileToColor(reactionProfile, 0.72);
     
     // Phenolphthalein override
     if (finalComponents.some(c => c.id === 'phenolphthalein') && avgPh > 8.5) {

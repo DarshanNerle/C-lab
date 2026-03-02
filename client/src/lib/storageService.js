@@ -286,6 +286,52 @@ class StorageService {
         });
     }
 
+    async updateUserProfile({ email, name, settings }) {
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+        if (!normalizedEmail) return { ok: false, source: 'local', storageMode: this.storageMode };
+
+        const payload = {
+            email: normalizedEmail,
+            name: typeof name === 'string' ? name.trim() : undefined,
+            settings: settings && typeof settings === 'object' ? settings : undefined
+        };
+
+        const writeKey = `updateUser:${normalizedEmail}:${JSON.stringify(payload)}`;
+        return this.dedupeWrite(writeKey, async () => {
+            if (this.storageMode !== STORAGE_MODES.LOCAL) {
+                try {
+                    const data = await this.request('/api/user/update', {
+                        method: 'POST',
+                        body: payload
+                    });
+                    this.setStorageMode(STORAGE_MODES.MONGO);
+                    if (payload.name || payload.settings) {
+                        this.saveLocalUserRecord(normalizedEmail, {
+                            name: payload.name,
+                            settings: payload.settings
+                        });
+                        if (payload.settings) this.saveLocalSettings(normalizedEmail, payload.settings);
+                    }
+                    return { ok: true, user: data?.user || null, source: data?.source || 'mongodb', storageMode: STORAGE_MODES.MONGO };
+                } catch (error) {
+                    if (!this.shouldFallback(error)) {
+                        return { ok: false, error: error?.message || 'Failed to update user', source: 'mongo', storageMode: STORAGE_MODES.MONGO };
+                    }
+                    this.setStorageMode(STORAGE_MODES.LOCAL);
+                }
+            }
+
+            if (payload.name || payload.settings) {
+                this.saveLocalUserRecord(normalizedEmail, {
+                    name: payload.name,
+                    settings: payload.settings
+                });
+                if (payload.settings) this.saveLocalSettings(normalizedEmail, payload.settings);
+            }
+            return { ok: true, user: this.mergeLocalUser(normalizedEmail), source: 'local', storageMode: STORAGE_MODES.LOCAL };
+        });
+    }
+
     async updateSettings({ email, settings }) {
         const normalizedEmail = String(email || '').trim().toLowerCase();
         if (!normalizedEmail) return { ok: false, source: 'local', storageMode: this.storageMode };

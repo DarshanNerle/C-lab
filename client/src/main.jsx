@@ -10,7 +10,12 @@ import { safeLocalStorage } from './utils/safeStorage'
 try {
     const raw = safeLocalStorage.getItem('c-lab-theme-settings')
     const parsed = raw ? JSON.parse(raw) : null
-    const mode = parsed?.state?.themeMode === 'light' ? 'light' : 'dark'
+    const storedMode = parsed?.state?.themeMode
+    const mode = storedMode === 'light'
+        ? 'light'
+        : storedMode === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : 'dark'
     document.documentElement.classList.toggle('dark', mode === 'dark')
     document.documentElement.classList.toggle('light', mode === 'light')
     document.documentElement.dataset.theme = mode

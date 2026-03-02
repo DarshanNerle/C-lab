@@ -7,6 +7,13 @@ export default {
     theme: {
         extend: {
             colors: {
+                brand: {
+                    electricBlue: '#3B82F6',
+                    softPurple: '#8B5CF6',
+                    tealAccent: '#14B8A6',
+                    warmOrange: '#F59E0B',
+                    coralPink: '#F43F5E'
+                },
                 neon: {
                     green: '#39FF14',
                     cyan: '#00FFFF',

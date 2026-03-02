@@ -5,7 +5,18 @@ const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
     const { themeMode, setThemeMode } = useThemeStore();
-    const normalizedTheme = themeMode === 'light' ? 'light' : 'dark';
+    const [systemTheme, setSystemTheme] = React.useState('dark');
+
+    React.useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        const apply = () => setSystemTheme(media.matches ? 'dark' : 'light');
+        apply();
+        media.addEventListener('change', apply);
+        return () => media.removeEventListener('change', apply);
+    }, []);
+
+    const normalizedTheme = themeMode === 'system' ? systemTheme : (themeMode === 'light' ? 'light' : 'dark');
 
     useEffect(() => {
         const root = document.documentElement;
@@ -23,8 +34,9 @@ export function ThemeProvider({ children }) {
 
     const value = useMemo(() => ({
         theme: normalizedTheme,
-        setTheme: (next) => setThemeMode(next === 'light' ? 'light' : 'dark')
-    }), [normalizedTheme, setThemeMode]);
+        themeMode,
+        setTheme: (next) => setThemeMode(next === 'light' ? 'light' : next === 'system' ? 'system' : 'dark')
+    }), [normalizedTheme, themeMode, setThemeMode]);
 
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

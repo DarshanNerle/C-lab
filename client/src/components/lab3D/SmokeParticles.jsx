@@ -1,54 +1,92 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-export default function SmokeParticles({ count = 20, position = [0, 1, 0] }) {
+function createParticleData(count, spread, riseMin, riseMax) {
+    const data = [];
+    for (let i = 0; i < count; i++) {
+        data.push({
+            x: (Math.random() - 0.5) * spread,
+            y: Math.random() * spread * 0.6,
+            z: (Math.random() - 0.5) * spread,
+            vy: riseMin + Math.random() * (riseMax - riseMin),
+            vx: (Math.random() - 0.5) * 0.002,
+            vz: (Math.random() - 0.5) * 0.002,
+            life: Math.random()
+        });
+    }
+    return data;
+}
+
+export default function SmokeParticles({
+    count = 20,
+    position = [0, 1, 0],
+    type = 'smoke',
+    color = '#cbd5e1',
+    intensity = 1
+}) {
     const mesh = useRef();
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    // Initialize particle data (position, velocity, life)
-    const particles = useMemo(() => {
-        const temp = [];
-        for (let i = 0; i < count; i++) {
-            temp.push({
-                x: (Math.random() - 0.5) * 0.2,
-                y: Math.random() * 0.5,
-                z: (Math.random() - 0.5) * 0.2,
-                vy: 0.01 + Math.random() * 0.02,
-                life: Math.random()
-            });
+    const config = useMemo(() => {
+        if (type === 'sparks') {
+            return { spread: 0.45, riseMin: 0.015, riseMax: 0.03, opacity: 0.75, scaleBase: 0.06, additive: true };
         }
-        return temp;
-    }, [count]);
+        if (type === 'mist') {
+            return { spread: 0.7, riseMin: 0.003, riseMax: 0.012, opacity: 0.28, scaleBase: 0.18, additive: false };
+        }
+        if (type === 'steam') {
+            return { spread: 0.32, riseMin: 0.01, riseMax: 0.02, opacity: 0.34, scaleBase: 0.12, additive: true };
+        }
+        return { spread: 0.35, riseMin: 0.008, riseMax: 0.017, opacity: 0.32, scaleBase: 0.14, additive: false };
+    }, [type]);
 
-    useFrame(() => {
+    const particles = useMemo(
+        () => createParticleData(count, config.spread, config.riseMin, config.riseMax),
+        [count, config]
+    );
+
+    useFrame((state, delta) => {
+        if (!mesh.current) return;
+
+        const drift = Math.sin(state.clock.elapsedTime * 0.6) * 0.0009;
+        const dt = Math.min(delta * 60, 2);
+
         particles.forEach((particle, i) => {
-            particle.y += particle.vy;
-            particle.life += 0.01;
+            particle.x += (particle.vx + drift) * dt;
+            particle.y += particle.vy * dt * intensity;
+            particle.z += particle.vz * dt;
+            particle.life += 0.012 * dt;
 
-            // Reset if died
-            if (particle.life > 1) {
+            if (particle.life > 1 || particle.y > 1.8) {
+                particle.x = (Math.random() - 0.5) * config.spread;
                 particle.y = 0;
+                particle.z = (Math.random() - 0.5) * config.spread;
                 particle.life = 0;
-                particle.x = (Math.random() - 0.5) * 0.2;
             }
 
+            const lifeWave = Math.sin(Math.PI * particle.life);
+            const scale = Math.max(0.01, (config.scaleBase + lifeWave * config.scaleBase) * intensity);
+
             dummy.position.set(particle.x, particle.y, particle.z);
-            // Scale based on life (grow then shrink)
-            const scale = Math.sin(Math.PI * particle.life) * 0.2 + 0.1;
-            dummy.scale.set(scale, scale, scale);
+            dummy.scale.set(scale, scale * 1.08, scale);
             dummy.updateMatrix();
             mesh.current.setMatrixAt(i, dummy.matrix);
-
-            // We could update color attributes here for fading out
         });
+
         mesh.current.instanceMatrix.needsUpdate = true;
     });
 
     return (
         <instancedMesh ref={mesh} args={[null, null, count]} position={position}>
-            <sphereGeometry args={[1, 16, 16]} />
-            <meshBasicMaterial color="#aaaaaa" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+            <sphereGeometry args={[1, 10, 10]} />
+            <meshBasicMaterial
+                color={color}
+                transparent
+                opacity={config.opacity}
+                blending={config.additive ? THREE.AdditiveBlending : THREE.NormalBlending}
+                depthWrite={false}
+            />
         </instancedMesh>
     );
 }

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import VirtualLab from './pages/VirtualLab'
 import Experiments from './pages/Experiments'
 import Profile from './pages/Profile'
+import EditProfile from './pages/EditProfile'
 import LeaderboardPage from './pages/LeaderboardPage'
 import Register from './pages/Register'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -17,6 +18,7 @@ import AIChemistryMaster from './pages/AIChemistryMaster'
 import LabNotebook from './components/notebook/LabNotebook'
 import QuizOverlay from './components/quiz/QuizOverlay'
 import FloatingAIButton from './components/teaching/FloatingAIButton'
+import AppShell from './components/layout/AppShell'
 import { soundManager } from './utils/soundManager'
 import useThemeStore from './store/useThemeStore'
 import useAuthStore from './store/useAuthStore'
@@ -30,6 +32,8 @@ import DBStatusBadge from './components/ui/DBStatusBadge'
 import { storageService } from './lib/storageService'
 
 function App() {
+    const navigate = useNavigate()
+    const location = useLocation()
     const { isSoundEnabled, soundVolume, immersiveMode, animationIntensity, syncSettings } = useThemeStore()
     const { currentMode, syncSettings: syncAISettings } = useAIStore()
     const { voiceEnabled, speechRate, speechPitch, selectedVoice, voiceGender, syncSettings: syncVoiceSettings } = useVoiceStore()
@@ -120,7 +124,8 @@ function App() {
                     email: user.email,
                     settings: {
                         darkMode: useThemeStore.getState().themeMode !== 'light',
-                        theme: useThemeStore.getState().themeMode === 'light' ? 'light' : 'dark',
+                        theme: useThemeStore.getState().themeMode,
+                        autoTheme: useThemeStore.getState().themeMode === 'system',
                         soundEnabled: isSoundEnabled,
                         soundVolume,
                         immersiveMode,
@@ -145,6 +150,26 @@ function App() {
         }
     }, [user?.email, isSoundEnabled, soundVolume, immersiveMode, currentMode, animationIntensity, voiceEnabled, speechRate, speechPitch, selectedVoice, voiceGender])
 
+    useEffect(() => {
+        const isTypingTarget = (target) => {
+            const tag = target?.tagName?.toLowerCase()
+            return tag === 'input' || tag === 'textarea' || target?.isContentEditable
+        }
+
+        const onKeyDown = (event) => {
+            if (isTypingTarget(event.target)) return
+            if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+
+            const key = event.key.toLowerCase()
+            if (key === 'd') navigate('/dashboard')
+            if (key === 'a') navigate('/ai-chemistry-master')
+            if (key === 'l') navigate(location.pathname === '/lab' ? '/lab2d' : '/lab')
+        }
+
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [location.pathname, navigate])
+
     return (
         <div className="w-full h-screen overflow-hidden flex flex-col relative">
             <LabNotebook />
@@ -155,17 +180,20 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/lab" element={<VirtualLab />} />
                 <Route path="/lab2d" element={<VirtualLab2D />} />
-                <Route path="/experiments" element={<Experiments />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/teacher" element={<TeacherDashboard />} />
-                <Route path="/skills" element={<SkillTree />} />
                 <Route path="/report/:reportId" element={<LabReport />} />
                 <Route path="/ai-chemistry-master" element={<AIChemistryMaster />} />
+                <Route element={<AppShell />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/experiments" element={<Experiments />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/profile/edit" element={<EditProfile />} />
+                    <Route path="/leaderboard" element={<LeaderboardPage />} />
+                    <Route path="/skills" element={<SkillTree />} />
+                </Route>
             </Routes>
         </div>
     )

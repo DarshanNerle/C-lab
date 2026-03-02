@@ -152,7 +152,7 @@ const FloatingAIButton = () => {
     };
 
     return (
-        <div className="fixed bottom-5 right-5 z-[9999] flex flex-col items-end">
+        <div className="fixed bottom-24 right-4 z-[9999] flex flex-col items-end md:bottom-5 md:right-5">
             {/* Chat Popup */}
             <AnimatePresence>
                 {isMiniOpen && (
@@ -160,10 +160,10 @@ const FloatingAIButton = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="mb-4 w-80 h-[450px] bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+                        className="mb-4 h-[450px] w-80 glass-sheen rounded-2xl border border-cyan-400/30 bg-slate-900/92 shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="p-4 bg-gradient-to-r from-cyan-600 to-blue-700 text-white flex justify-between items-center shadow-lg">
+                        <div className="p-4 bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 text-white flex justify-between items-center shadow-lg">
                             <div className="flex items-center gap-2">
                                 <span className="text-xl">🧪</span>
                                 <div>
@@ -313,7 +313,7 @@ const FloatingAIButton = () => {
                 onClick={toggleMiniAssistant}
                 className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl transition-all ${isMiniOpen
                     ? 'bg-slate-800 border-2 border-cyan-500 text-cyan-500 rotate-90'
-                    : 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white'
+                    : 'bg-gradient-to-br from-blue-500 via-violet-500 to-rose-500 text-white shadow-[0_16px_28px_rgba(59,130,246,0.4)]'
                     }`}
             >
                 {isMiniOpen ? '✕' : '⚗️'}

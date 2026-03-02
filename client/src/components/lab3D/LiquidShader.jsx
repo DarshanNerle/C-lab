@@ -10,8 +10,9 @@ export const LiquidShaderMaterial = new THREE.ShaderMaterial({
     uColor: { value: new THREE.Color("#00ffff") },
     uFillLevel: { value: 0.5 },
     uBubbling: { value: 0.0 },
+    uSlosh: { value: 0.0 },
     uOpacity: { value: 0.8 },
-    uFresnelPower: { value: 2.0 }
+    uFresnelPower: { value: 2.4 }
   },
   vertexShader: `
         varying vec2 vUv;
@@ -20,6 +21,7 @@ export const LiquidShaderMaterial = new THREE.ShaderMaterial({
         varying vec3 vWorldPosition;
         uniform float uTime;
         uniform float uFillLevel;
+        uniform float uSlosh;
 
         void main() {
             vUv = uv;
@@ -35,7 +37,9 @@ export const LiquidShaderMaterial = new THREE.ShaderMaterial({
             
             // Surface displacement
             if(pos.y > (uFillLevel - 0.05)) {
-                float wave = sin(pos.x * 12.0 + uTime * 3.0) * cos(pos.z * 10.0 + uTime * 2.0) * 0.02;
+                float sloshTilt = (pos.x * 0.09 + pos.z * 0.05) * uSlosh;
+                float wave = sin(pos.x * 12.0 + uTime * 3.0) * cos(pos.z * 10.0 + uTime * 2.0) * (0.02 + uSlosh * 0.03);
+                wave += sloshTilt;
                 pos.y += wave;
             }
 
@@ -67,7 +71,14 @@ export const LiquidShaderMaterial = new THREE.ShaderMaterial({
             vec3 surfaceColor = uColor * 1.2;
             
             vec3 finalColor = mix(deepColor, surfaceColor, depth);
-            finalColor += fresnel * 0.5; // add some shine
+
+            // Refraction-like caustic streak for premium liquid look
+            float caustic = sin((vWorldPosition.x + vWorldPosition.z) * 28.0 + uTime * 1.8) * 0.08;
+            finalColor += vec3(0.08, 0.1, 0.12) * (fresnel + caustic);
+
+            // Surface reflection highlight
+            float spec = pow(max(dot(normal, normalize(vec3(0.2, 0.9, 0.3))), 0.0), 22.0);
+            finalColor += vec3(0.75) * spec * 0.35;
 
             // Bubbling sparkle effect
             if(uBubbling > 0.5) {
