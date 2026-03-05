@@ -174,7 +174,6 @@ function App() {
         <div className="w-full h-screen overflow-hidden flex flex-col relative">
             <LabNotebook />
             <QuizOverlay />
-            <FloatingAIButton />
             <DBStatusBadge />
             <Routes>
                 <Route path="/" element={<Home />} />
@@ -195,6 +194,7 @@ function App() {
                     <Route path="/skills" element={<SkillTree />} />
                 </Route>
             </Routes>
+            <FloatingAIButton />
         </div>
     )
 }

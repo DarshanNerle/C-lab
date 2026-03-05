@@ -5,18 +5,17 @@ import useAuthStore from '../../store/useAuthStore';
 import useVoiceStore from '../../store/useVoiceStore';
 import { AIController } from '../../modules/teaching/AIController';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Square, Volume2 } from 'lucide-react';
+import { Mic, MicOff, Square, Volume2, Bot, RotateCcw, X, Wand2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { voiceManager } from '../../utils/VoiceManager';
+import useThemeStore from '../../store/useThemeStore';
+import { safeLocalStorage } from '../../utils/safeStorage';
 
 /**
  * FloatingAIButton - MODE 1: Floating AI Assistant (Mini Copilot)
  * Appears as a small circular button in the bottom-right corner.
  */
 const FloatingAIButton = () => {
-    // ... logic remains unchanged
-
-    // Render logic update down below...
     const {
         isMiniOpen,
         toggleMiniAssistant,
@@ -37,6 +36,53 @@ const FloatingAIButton = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { voiceEnabled, speechRate, speechPitch, selectedVoice, voiceGender, isSpeaking, setIsSpeaking, toggleVoice } = useVoiceStore();
+    const { isSidebarCollapsed } = useThemeStore();
+
+    // --- Position Persistence ---
+    const [position, setPosition] = useState(null);
+    const dragInfo = useRef({ active: false, hasMoved: false });
+
+    // Load persisted position with safety check & bounds validation
+    useEffect(() => {
+        const saved = safeLocalStorage.getItem('c_lab_ai_pos');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.x !== undefined && parsed.y !== undefined) {
+                    const maxX = window.innerWidth - 80;
+                    const maxY = window.innerHeight - 80;
+                    const safeX = Math.max(10, Math.min(parsed.x, maxX));
+                    const safeY = Math.max(10, Math.min(parsed.y, maxY));
+                    setPosition({ x: safeX, y: safeY });
+                }
+            } catch (e) {
+                console.error("Failed to load AI position", e);
+            }
+        }
+
+        // Rescue Shortcut: Ctrl+Alt+A to Reset Bot Position
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+                setPosition(null);
+                safeLocalStorage.removeItem('c_lab_ai_pos');
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Save position safely
+    useEffect(() => {
+        if (position) {
+            safeLocalStorage.setItem('c_lab_ai_pos', JSON.stringify(position));
+        } else if (position === null) {
+            safeLocalStorage.removeItem('c_lab_ai_pos');
+        }
+    }, [position]);
+
+    // Determine if on a page with a sidebar
+    const isAppShellPage = ['/dashboard', '/experiments', '/profile', '/leaderboard', '/skills'].some(p => location.pathname.startsWith(p));
+    const isLab2D = location.pathname.startsWith('/lab2d');
 
     // Sync current page with store
     useEffect(() => {
@@ -152,15 +198,30 @@ const FloatingAIButton = () => {
     };
 
     return (
-        <div className="fixed bottom-24 right-4 z-[9999] flex flex-col items-end md:bottom-5 md:right-5">
+        <div
+            style={position ? {
+                left: position.x,
+                top: position.y,
+                bottom: 'auto',
+                right: 'auto',
+                position: 'fixed'
+            } : {
+                bottom: isAppShellPage ? '5.5rem' : '1.5rem',
+                right: '1.5rem',
+                left: 'auto',
+                top: 'auto',
+                position: 'fixed'
+            }}
+            className="z-[9999] p-2 pointer-events-none flex flex-col items-end"
+        >
             {/* Chat Popup */}
             <AnimatePresence>
                 {isMiniOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
-                        className="mb-4 h-[450px] w-80 glass-sheen rounded-2xl border border-cyan-400/30 bg-slate-900/92 shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="mb-4 h-[500px] w-[350px] glass-sheen rounded-2xl border border-white/20 bg-slate-950/95 shadow-2xl backdrop-blur-2xl flex flex-col overflow-hidden pointer-events-auto"
                     >
                         {/* Header */}
                         <div className="p-4 bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 text-white flex justify-between items-center shadow-lg">
@@ -171,14 +232,21 @@ const FloatingAIButton = () => {
                                     <p className="text-[10px] opacity-80">Mini Assistant • {currentPage}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={toggleMiniAssistant}
-                                className="hover:bg-white/20 p-1 rounded-full transition-colors"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                                <button
+                                    onClick={() => setPosition(null)}
+                                    title="Reset Position"
+                                    className="hover:bg-white/20 p-2 rounded-lg transition-colors text-white/90"
+                                >
+                                    <RotateCcw className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={toggleMiniAssistant}
+                                    className="hover:bg-white/20 p-2 rounded-lg transition-colors text-white/90"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Chat Messages */}
@@ -306,25 +374,88 @@ const FloatingAIButton = () => {
                 )}
             </AnimatePresence>
 
-            {/* Floating Button */}
-            <motion.button
-                whileHover={{ scale: 1.1 }}
+            {/* Floating Button with Pure Framer Motion Drag */}
+            <motion.div
+                drag
+                dragMomentum={false}
+                dragConstraints={{
+                    top: 10,
+                    left: 10,
+                    right: window.innerWidth - 70,
+                    bottom: window.innerHeight - 70
+                }}
+                onDragStart={() => {
+                    dragInfo.current.active = true;
+                    dragInfo.current.hasMoved = false;
+                }}
+                onDrag={() => {
+                    dragInfo.current.hasMoved = true;
+                }}
+                onDragEnd={(event, info) => {
+                    dragInfo.current.active = false;
+                    const newPos = {
+                        x: info.point.x - 28, // Offset to center the button
+                        y: info.point.y - 28
+                    };
+                    setPosition(newPos);
+                    // Minimal delay to ensure hasMoved is false for subsequent taps
+                    setTimeout(() => {
+                        dragInfo.current.hasMoved = false;
+                    }, 50);
+                }}
+                whileHover={{ scale: 1.15, rotate: isMiniOpen ? 90 : 5 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={toggleMiniAssistant}
-                className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl transition-all ${isMiniOpen
-                    ? 'bg-slate-800 border-2 border-cyan-500 text-cyan-500 rotate-90'
-                    : 'bg-gradient-to-br from-blue-500 via-violet-500 to-rose-500 text-white shadow-[0_16px_28px_rgba(59,130,246,0.4)]'
+                className={`group relative w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-2xl cursor-grab active:cursor-grabbing pointer-events-auto ${isMiniOpen
+                    ? 'bg-slate-900 border-2 border-cyan-400 text-cyan-400 shadow-cyan-500/30'
+                    : 'bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 text-white shadow-blue-500/20'
                     }`}
+                onTap={() => {
+                    if (!dragInfo.current.hasMoved) {
+                        toggleMiniAssistant();
+                    }
+                    dragInfo.current.hasMoved = false;
+                }}
             >
-                {isMiniOpen ? '✕' : '⚗️'}
+                {/* Glow Pulse Effect */}
                 {!isMiniOpen && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-500"></span>
+                    <motion.div
+                        animate={{
+                            opacity: [0.2, 0.4, 0.2],
+                            scale: [1, 1.3, 1],
+                        }}
+                        transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="absolute inset-0 rounded-full bg-cyan-400/40 blur-xl z-0"
+                    />
+                )}
+
+                <div className="relative z-10">
+                    {isMiniOpen ? <X className="w-6 h-6" /> : <Bot className="w-7 h-7" />}
+                </div>
+
+                {!isMiniOpen && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 z-20">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border border-white shadow-sm"></span>
                     </span>
                 )}
-            </motion.button>
+
+                {/* Tooltip */}
+                {!isMiniOpen && (
+                    <div className="absolute right-full mr-4 px-4 py-2 bg-slate-950/95 backdrop-blur-md border border-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-2xl translate-x-2 group-hover:translate-x-0">
+                        <div className="flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-0.5">Professor AI Bot</span>
+                            <span className="text-[9px] text-slate-400 uppercase tracking-tighter">Drag anywhere to move</span>
+                        </div>
+                        <div className="absolute top-1/2 -right-1 -translate-y-1/2 border-4 border-transparent border-l-slate-950/95" />
+                    </div>
+                )}
+            </motion.div>
         </div>
+
     );
 };
 

@@ -117,8 +117,7 @@ function CommandPalette({ open, onClose, actions, onNavigate }) {
 export default function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { themeMode, setThemeMode } = useThemeStore();
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const { themeMode, setThemeMode, isSidebarCollapsed, toggleSidebarCollapsed } = useThemeStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCommandOpen, setIsCommandOpen] = useState(false);
     const nextTheme = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
@@ -241,7 +240,7 @@ export default function AppShell() {
                         )}
                         <button
                             type="button"
-                            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+                            onClick={toggleSidebarCollapsed}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white"
                             aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                         >

@@ -5,6 +5,7 @@ import useAuthStore from '../store/useAuthStore';
 import useAIStore from '../store/useAIStore';
 import useVoiceStore from '../store/useVoiceStore';
 import useLabStore from '../store/useLabStore';
+import useNotebookStore from '../store/useNotebookStore';
 import { AIController } from '../modules/teaching/AIController';
 import GlassCard from '../components/ui/GlassCard';
 import { voiceManager } from '../utils/VoiceManager';
@@ -24,7 +25,8 @@ import {
     Mic,
     MicOff,
     Square,
-    Volume2
+    Volume2,
+    FlaskConical
 } from 'lucide-react';
 
 /**
@@ -39,7 +41,8 @@ const AIChemistryMaster = () => {
         setUserLevel,
         currentTopic,
         setCurrentTopic,
-        progress
+        progress,
+        clearHistory
     } = useAIStore();
 
     const {
@@ -53,7 +56,7 @@ const AIChemistryMaster = () => {
     const [errorText, setErrorText] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [micError, setMicError] = useState('');
-    const [selectedMode, setSelectedMode] = useState('learn'); // 'learn' | 'quiz' | 'revision' | 'teacher_tools'
+    const [selectedMode, setSelectedMode] = useState('learn'); // 'learn' | 'quiz' | 'revision' | 'predictor' | 'teacher_tools'
     const [aiPersonality, setAIPersonality] = useState('Friendly Tutor');
     const [explanationDepth, setExplanationDepth] = useState('Medium');
     const [voiceMood, setVoiceMood] = useState('Professional');
@@ -145,6 +148,8 @@ const AIChemistryMaster = () => {
         const recentLabMemory = actionTimeline.slice(-4).map((step) => `${step.type}:${step.containerId || step.targetId || ''}`).join(', ');
         const composedInput = [
             `AI Personality: ${aiPersonality}.`,
+            `Study Mode: ${selectedMode}.`,
+            selectedMode === 'predictor' ? "CRITICAL: You are C-LAB AI, an advanced Chemistry Professor. For this reaction prediction, provide a structured response with exactly these sections: 1. Title (Reaction Name & Branch), 2. Definition (1-2 sentences), 3. General Reaction (Balanced Equation), 4. Reaction Explanation (Step-by-step bullet points), 5. Observations (Expected visual changes, bubbles, etc.), 6. Practical Application, 7. Safety Note. Use Markdown for formatting." : "",
             `Study Preset: ${studyPreset}.`,
             `Explanation Depth: ${explanationDepth}.`,
             `Voice Mood: ${voiceMood}.`,
@@ -236,6 +241,7 @@ const AIChemistryMaster = () => {
                     <div className="flex flex-col gap-2">
                         {[
                             { id: 'learn', label: 'Learn Concept', icon: <Book size={18} /> },
+                            { id: 'predictor', label: 'Reaction Predictor', icon: <FlaskConical size={18} /> },
                             { id: 'quiz', label: 'Start Quiz', icon: <FileText size={18} /> },
                             { id: 'revision', label: 'Revision Mode', icon: <RefreshCcw size={18} /> }
                         ].map(m => (
@@ -356,24 +362,94 @@ const AIChemistryMaster = () => {
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${selectedMode === 'learn' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                             selectedMode === 'quiz' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
                                 selectedMode === 'teacher_tools' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
-                                    'bg-green-500/10 text-green-400 border border-green-500/20'
+                                    selectedMode === 'predictor' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
+                                        'bg-green-500/10 text-green-400 border border-green-500/20'
                             }`}>
                             Mode: {selectedMode.replace('_', ' ')}
                         </div>
                         <h2 className="text-sm font-semibold text-slate-300">Active Topic: {currentTopic}</h2>
                     </div>
-                    <button className="text-xs text-slate-500 hover:text-white transition-colors">Clear History</button>
+                    <button
+                        onClick={() => clearHistory('full_learning')}
+                        className="text-xs text-slate-500 hover:text-white transition-colors"
+                    >
+                        Clear History
+                    </button>
                 </div>
 
                 {/* Messages Container */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
-                    {fullChatHistory.length === 0 && (
+                    {selectedMode === 'predictor' ? (
+                        <div className="max-w-xl mx-auto py-12">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-slate-800/40 p-10 rounded-3xl border border-cyan-400/20 shadow-2xl backdrop-blur-xl"
+                            >
+                                <div className="text-center mb-8">
+                                    <div className="w-16 h-16 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-400/30">
+                                        <FlaskConical className="text-cyan-400 w-8 h-8" />
+                                    </div>
+                                    <h2 className="text-2xl font-black text-white">Reaction Predictor</h2>
+                                    <p className="text-slate-400 text-sm mt-2">What chemicals are you mixing today, Scientist?</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-[10px] font-black uppercase text-cyan-400 tracking-widest pl-1">Reactants / Mixture</label>
+                                        <input
+                                            type="text"
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            placeholder="e.g. Copper Sulfate + Sodium Hydroxide"
+                                            className="w-full bg-slate-900/50 border border-slate-700/50 p-4 rounded-xl text-white outline-none focus:border-cyan-400 transition-colors"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={isTyping || !input.trim()}
+                                        className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-cyan-900/30 hover:scale-[1.02] active:scale-95 transition-all text-white"
+                                    >
+                                        {isTyping ? 'Analyzing Elements...' : 'Predict Outcome'}
+                                    </button>
+
+                                    <div className="mt-8 pt-6 border-t border-slate-700/30">
+                                        <p className="text-[10px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-4">Popular Predictions</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                { label: 'Acid-Base', query: 'HCl + NaOH' },
+                                                { label: 'Redox', query: 'Copper + Nitric Acid' },
+                                                { label: 'Precipitation', query: 'AgNO3 + NaCl' },
+                                                { label: 'Combustion', query: 'Methane + Oxygen' }
+                                            ].map((ex) => (
+                                                <button
+                                                    key={ex.label}
+                                                    onClick={() => setInput(ex.query)}
+                                                    className="text-[10px] bg-slate-900/50 hover:bg-cyan-500/10 text-slate-400 hover:text-cyan-400 px-3 py-2 rounded-lg border border-slate-700 hover:border-cyan-500/30 transition-all"
+                                                >
+                                                    {ex.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    ) : fullChatHistory.length === 0 && (
                         <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto">
                             <div className="text-6xl mb-6">⚗️</div>
                             <h2 className="text-2xl font-bold mb-2">Ready to Master Chemistry?</h2>
                             <p className="text-slate-400">
-                                I'm your advanced AI mentor. Select a topic and mode, or just start asking deep questions about chemical reactions, thermodynamics, or bonding.
+                                I&apos;m your advanced AI mentor. Select a topic and mode, or just start asking deep questions about chemical reactions, thermodynamics, or bonding.
                             </p>
+                        </div>
+                    )}
+
+                    {selectedMode === 'predictor' && fullChatHistory.length > 0 && (
+                        <div className="pb-8">
+                            <h2 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+                                <History className="w-4 h-4" /> Previous Predictions
+                            </h2>
                         </div>
                     )}
 
@@ -389,18 +465,46 @@ const AIChemistryMaster = () => {
                                     }`}>
                                     {msg.role === 'user' ? '👤' : '🧪'}
                                 </div>
-                                <div className={`p-5 rounded-3xl ${msg.role === 'user'
+                                <div className={`p-5 rounded-3xl relative group ${msg.role === 'user'
                                     ? 'bg-slate-800 text-slate-200 rounded-tr-none'
-                                    : 'bg-[#1a2133] text-slate-100 border border-slate-700/50 shadow-xl rounded-tl-none'
+                                    : selectedMode === 'predictor'
+                                        ? 'bg-gradient-to-br from-[#1a2133] to-[#0f172a] text-slate-100 border border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.05)] rounded-tl-none'
+                                        : 'bg-[#1a2133] text-slate-100 border border-slate-700/50 shadow-xl rounded-tl-none'
                                     }`}>
                                     {msg.role === 'user' ? (
                                         msg.content
                                     ) : (
-                                        <div className="prose prose-invert prose-sm max-w-none break-words">
-                                            <ReactMarkdown>
-                                                {msg.content}
-                                            </ReactMarkdown>
-                                        </div>
+                                        <>
+                                            <div className="prose prose-invert prose-sm max-w-none break-words">
+                                                <ReactMarkdown>
+                                                    {msg.content}
+                                                </ReactMarkdown>
+                                            </div>
+
+                                            {/* Action Buttons for AI Response */}
+                                            <div className="absolute -bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(msg.content);
+                                                        // Simple feedback could be added here
+                                                    }}
+                                                    className="bg-slate-800 border border-slate-700 p-1.5 rounded-lg text-[10px] text-slate-400 hover:text-white flex items-center gap-1 shadow-lg"
+                                                    title="Copy to Clipboard"
+                                                >
+                                                    <FileText size={12} /> Copy
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        useNotebookStore.getState().addLog(`AI REACTION PREDICTION: ${msg.content.split('\n')[0]}`);
+                                                        alert("Saved to Lab Notebook!");
+                                                    }}
+                                                    className="bg-slate-800 border border-slate-700 p-1.5 rounded-lg text-[10px] text-slate-400 hover:text-white flex items-center gap-1 shadow-lg"
+                                                    title="Save to Lab Notebook"
+                                                >
+                                                    <Book size={12} /> Save
+                                                </button>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </div>
