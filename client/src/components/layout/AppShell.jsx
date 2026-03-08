@@ -9,6 +9,7 @@ import {
     Command,
     FlaskConical,
     Home,
+    GraduationCap,
     Menu,
     Monitor,
     Moon,
@@ -25,6 +26,7 @@ const primaryNav = [
     { label: '2D Lab', to: '/lab2d', icon: Beaker, shortcut: 'L' },
     { label: '3D Lab', to: '/lab', icon: FlaskConical, shortcut: 'L' },
     { label: 'Experiment Lab', to: '/experiment-lab', icon: FlaskConical, shortcut: 'E' },
+    { label: 'Learn More', to: '/learn-more', icon: GraduationCap, shortcut: 'M' },
     { label: 'AI Chat', to: '/ai-chemistry-master', icon: Bot, shortcut: 'A' },
     { label: 'Experiments', to: '/experiments', icon: Command, shortcut: 'Ctrl+K' },
     { label: 'History', to: '/leaderboard', icon: Trophy, shortcut: '' }
@@ -124,7 +126,7 @@ export default function AppShell() {
     const nextTheme = themeMode === 'light' ? 'dark' : 'light';
 
     const commandActions = useMemo(() => sidebarItems, []);
-    const isWideContent = location.pathname === '/skills';
+    const isWideContent = location.pathname === '/skills' || location.pathname === '/learn-more';
 
     useEffect(() => {
         const isTypingTarget = (target) => {
@@ -146,6 +148,7 @@ export default function AppShell() {
             if (key === 'd') navigate('/dashboard');
             if (key === 'a') navigate('/ai-chemistry-master');
             if (key === 'l') navigate(location.pathname === '/lab' ? '/lab2d' : '/lab');
+            if (key === 'm') navigate('/learn-more');
         };
 
         document.addEventListener('keydown', onKeyDown);
@@ -263,8 +266,8 @@ export default function AppShell() {
                 </main>
             </div>
 
-            <nav className="fixed inset-x-3 bottom-3 z-[130] grid grid-cols-5 gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-2 backdrop-blur-xl md:hidden">
-                {primaryNav.slice(0, 5).map((item) => {
+            <nav className="fixed inset-x-3 bottom-3 z-[130] grid grid-cols-6 gap-2 rounded-2xl border border-white/15 bg-slate-950/90 p-2 backdrop-blur-xl md:hidden">
+                {primaryNav.slice(0, 6).map((item) => {
                     const Icon = item.icon;
                     const active = location.pathname === item.to;
                     return (

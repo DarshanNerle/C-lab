@@ -13,6 +13,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teaching/TeacherDashboard'
 import VirtualLab2D from './pages/VirtualLab2D'
 import SkillTree from './pages/SkillTree'
+import LearnMore from './pages/LearnMore'
 import LabReport from './components/reports/LabReport'
 import AIChemistryMaster from './pages/AIChemistryMaster'
 import LabNotebook from './components/notebook/LabNotebook'
@@ -191,6 +192,7 @@ function App() {
                 <Route path="/ai-chemistry-master" element={<AIChemistryMaster />} />
                 <Route element={<AppShell />}>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/learn-more" element={<LearnMore />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />

@@ -81,7 +81,7 @@ const FloatingAIButton = () => {
     }, [position]);
 
     // Determine if on a page with a sidebar
-    const isAppShellPage = ['/dashboard', '/experiments', '/profile', '/leaderboard', '/skills'].some(p => location.pathname.startsWith(p));
+    const isAppShellPage = ['/dashboard', '/experiments', '/profile', '/leaderboard', '/skills', '/learn-more'].some(p => location.pathname.startsWith(p));
     const isLab2D = location.pathname.startsWith('/lab2d');
 
     // Sync current page with store
@@ -91,6 +91,7 @@ const FloatingAIButton = () => {
         if (path.includes('lab2d')) pageName = '2D Lab';
         else if (path.includes('lab')) pageName = '3D Lab';
         else if (path.includes('experiments')) pageName = 'Experiments';
+        else if (path.includes('learn-more')) pageName = 'Learn More';
         else if (path.includes('quiz')) pageName = 'Quiz Page';
 
         setCurrentPage(pageName);
