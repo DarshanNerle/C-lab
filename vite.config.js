@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import dotenv from 'dotenv'
+import fs from 'fs'
 import path from 'path'
 import url from 'url'
 
@@ -34,7 +35,13 @@ const vercelApiEmulation = () => ({
       try {
         // Resolve the API file path
         const urlPath = req.url.split('?')[0]; // Remove query params
-        const filePath = path.resolve(process.cwd(), urlPath.substring(1) + '.js');
+        const exactFilePath = path.resolve(process.cwd(), urlPath.substring(1) + '.js');
+        const catchAllFilePath = path.resolve(process.cwd(), 'api/[...route].js');
+        const filePath = fs.existsSync(exactFilePath) ? exactFilePath : catchAllFilePath;
+
+        if (!fs.existsSync(filePath)) {
+          return next();
+        }
         
         // Polyfill Vercel helper functions
         res.status = (code) => { res.statusCode = code; return res; };
