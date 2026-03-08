@@ -18,6 +18,7 @@ import AIChemistryMaster from './pages/AIChemistryMaster'
 import LabNotebook from './components/notebook/LabNotebook'
 import QuizOverlay from './components/quiz/QuizOverlay'
 import FloatingAIButton from './components/teaching/FloatingAIButton'
+import ExperimentLab from './pages/ExperimentLab'
 import AppShell from './components/layout/AppShell'
 import { soundManager } from './utils/soundManager'
 import useThemeStore from './store/useThemeStore'
@@ -41,6 +42,7 @@ function App() {
     const { syncGameStats } = useGameStore()
     const { hydrateLabState } = useLabStore()
     const settingsSyncTimerRef = useRef(null)
+    const isImmersiveLabRoute = location.pathname === '/experiment-lab' || location.pathname === '/experiments'
 
     useEffect(() => {
         const unsubscribeMode = storageService.subscribe((mode) => {
@@ -172,29 +174,30 @@ function App() {
 
     return (
         <div className="w-full h-screen overflow-hidden flex flex-col relative">
-            <LabNotebook />
-            <QuizOverlay />
-            <DBStatusBadge />
+            {!isImmersiveLabRoute && <LabNotebook />}
+            {!isImmersiveLabRoute && <QuizOverlay />}
+            {!isImmersiveLabRoute && <DBStatusBadge />}
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/lab" element={<VirtualLab />} />
                 <Route path="/lab2d" element={<VirtualLab2D />} />
+                <Route path="/experiments" element={<Experiments />} />
+                <Route path="/experiment-lab" element={<ExperimentLab />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/teacher" element={<TeacherDashboard />} />
                 <Route path="/report/:reportId" element={<LabReport />} />
                 <Route path="/ai-chemistry-master" element={<AIChemistryMaster />} />
                 <Route element={<AppShell />}>
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/experiments" element={<Experiments />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/profile/edit" element={<EditProfile />} />
                     <Route path="/leaderboard" element={<LeaderboardPage />} />
                     <Route path="/skills" element={<SkillTree />} />
                 </Route>
             </Routes>
-            <FloatingAIButton />
+            {!isImmersiveLabRoute && <FloatingAIButton />}
         </div>
     )
 }

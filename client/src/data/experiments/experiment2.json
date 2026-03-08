@@ -1,0 +1,77 @@
+{
+    "id": "experiment2",
+    "title": "pH Metric Titration of Acetic Acid vs NaOH",
+    "aim": "To determine the concentration of a weak acid (CH3COOH) by titrating it against a strong base (NaOH) using a pH meter.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "50 mins",
+    "apparatus": [
+        "pH Meter",
+        "Burette (50 mL)",
+        "Beaker (250 mL)",
+        "Magnetic stirrer",
+        "Pipette (10 mL)",
+        "Wash bottle"
+    ],
+    "chemicals": [
+        "Acetic Acid (CH3COOH)",
+        "Sodium Hydroxide (NaOH)",
+        "Distilled water",
+        "Phenolphthalein (optional)"
+    ],
+    "theory": "In the titration of a weak acid with a strong base, the pH increases gradually initially. Near the equivalence point, there is a sharp rise in pH. For acetic acid and NaOH, the salt formed (sodium acetate) undergoes basic hydrolysis, making the pH at the equivalence point greater than 7.",
+    "procedure": [
+        "Calibrate the pH meter with pH 4 and pH 7 buffer solutions.",
+        "Pipette out 10 mL of acetic acid into a 250 mL beaker.",
+        "Add enough distilled water to submerge the pH bulb.",
+        "Fill the burette with 0.1M NaOH solution.",
+        "Place the beaker on a magnetic stirrer and insert the probe.",
+        "Record the initial pH.",
+        "Add NaOH in 0.5 mL increments and record the pH.",
+        "As the pH starts to rise rapidly, reduce the increment to 0.1 mL.",
+        "Continue titration until the pH reaches around 12.",
+        "Calculate the equivalence point from the pH vs volume graph."
+    ],
+    "formula": "M1V1 = M2V2",
+    "requiredFormula": {
+        "normalization": "M1V1 = M2V2",
+        "description": "Where M1 = Molarity of Acid, V1 = Volume of Acid, M2 = Molarity of Base, V2 = Volume of Base at equivalence point."
+    },
+    "safety": [
+        "Acetic acid and NaOH are corrosive.",
+        "Handle the pH probe with care (do not touch the glass bulb).",
+        "Keep the probe in storage solution when not in use."
+    ],
+    "observationTableStructure": [
+        {
+            "key": "trial",
+            "label": "Trial No."
+        },
+        {
+            "key": "volume",
+            "label": "Volume NaOH (mL)",
+            "unit": "mL"
+        },
+        {
+            "key": "ph",
+            "label": "pH Value",
+            "unit": ""
+        }
+    ],
+    "graph": {
+        "xAxis": "volume",
+        "yAxis": "ph",
+        "xLabel": "Volume of NaOH (mL)",
+        "yLabel": "pH",
+        "title": "pH vs Volume",
+        "type": "sigmoid-line"
+    },
+    "calculations": {
+        "findEquivalencePoint": "midpoint-of-sharp-rise",
+        "formulaToApply": "M1 = (M2 * V2) / V1",
+        "knowns": {
+            "V1": 10,
+            "M2": 0.1
+        },
+        "solveFor": "M1"
+    }
+}

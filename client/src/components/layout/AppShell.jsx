@@ -24,6 +24,7 @@ const primaryNav = [
     { label: 'Dashboard', to: '/dashboard', icon: Home, shortcut: 'D' },
     { label: '2D Lab', to: '/lab2d', icon: Beaker, shortcut: 'L' },
     { label: '3D Lab', to: '/lab', icon: FlaskConical, shortcut: 'L' },
+    { label: 'Experiment Lab', to: '/experiment-lab', icon: FlaskConical, shortcut: 'E' },
     { label: 'AI Chat', to: '/ai-chemistry-master', icon: Bot, shortcut: 'A' },
     { label: 'Experiments', to: '/experiments', icon: Command, shortcut: 'Ctrl+K' },
     { label: 'History', to: '/leaderboard', icon: Trophy, shortcut: '' }
@@ -120,7 +121,7 @@ export default function AppShell() {
     const { themeMode, setThemeMode, isSidebarCollapsed, toggleSidebarCollapsed } = useThemeStore();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCommandOpen, setIsCommandOpen] = useState(false);
-    const nextTheme = themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
+    const nextTheme = themeMode === 'light' ? 'dark' : 'light';
 
     const commandActions = useMemo(() => sidebarItems, []);
     const isWideContent = location.pathname === '/skills';
@@ -210,7 +211,7 @@ export default function AppShell() {
                             onClick={() => setThemeMode(nextTheme)}
                             aria-label={`Switch to ${nextTheme} theme`}
                         >
-                            {themeMode === 'dark' ? <Sun className="h-4 w-4" /> : themeMode === 'light' ? <Monitor className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                            {themeMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                         </button>
 
                         <button

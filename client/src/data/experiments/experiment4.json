@@ -1,0 +1,82 @@
+{
+    "id": "experiment4",
+    "title": "Determination of Viscosity of Liquids",
+    "aim": "To determine the viscosity of a given unknown liquid (e.g., ethanol or glycol) relative to water using an Ostwald viscometer.",
+    "difficulty": "Beginner",
+    "estimatedTime": "30 mins",
+    "apparatus": [
+        "Ostwald viscometer",
+        "Stopwatch",
+        "Beakers (two, 50 mL)",
+        "Suction bulb",
+        "Retort stand",
+        "Thermometer",
+        "Water bath (for constant temperature)"
+    ],
+    "chemicals": [
+        "Distilled water",
+        "Unknown liquid (Ethanol / Glycerol)",
+        "Chromic acid (for cleaning viscometer)"
+    ],
+    "theory": "Viscosity (η) is the internal friction of a liquid. Using an Ostwald viscometer, the time taken (t) for a fixed volume of liquid to flow through a capillary tube depends on its density (ρ) and viscosity. The relative viscosity is calculated using the formula: η2 / η1 = (ρ2 * t2) / (ρ1 * t1), where 1 refers to water and 2 refers to the unknown liquid.",
+    "procedure": [
+        "Clean the viscometer thoroughly and fix it vertically to the retort stand.",
+        "Add a known volume (e.g., 20 mL) of distilled water into the wider bulb of the viscometer.",
+        "Using a suction bulb, pull the water up into the upper bulb until it is above mark 'A'.",
+        "Let the water flow down under gravity. Start the stopwatch when the meniscus passes mark 'A' and stop when it passes mark 'B'.",
+        "Repeat this process three times for water and find the average time (t1).",
+        "Empty and dry the viscometer, then repeat the same procedure for the unknown liquid to find average time (t2).",
+        "Measure the temperature using a thermometer to get density values (ρ1 and ρ2) from standard tables.",
+        "Calculate the relative viscosity (η2) using η1 (viscosity of water) at that temperature."
+    ],
+    "formula": "η2 = η1 * (ρ2 * t2) / (ρ1 * t1)",
+    "requiredFormula": {
+        "normalization": "η2 / η1 = (ρ2 * t2) / (ρ1 * t1)",
+        "description": "η = Viscosity, ρ = Density, t = Flow time."
+    },
+    "safety": [
+        "Ostwald viscometer is extremely fragile; do not apply force while attaching the stand or bulb.",
+        "Do not suck liquids by mouth; always use a suction bulb.",
+        "Ethanol is flammable; keep away from open flames.",
+        "Avoid any debris in the viscometer as it can block the fine capillary tube."
+    ],
+    "observationTableStructure": [
+        {
+            "key": "liquid",
+            "label": "Liquid Name"
+        },
+        {
+            "key": "t1",
+            "label": "Flow Time (s), Trial 1",
+            "unit": "s"
+        },
+        {
+            "key": "t2",
+            "label": "Flow Time (s), Trial 2",
+            "unit": "s"
+        },
+        {
+            "key": "avg",
+            "label": "Average Flow Time",
+            "unit": "s"
+        }
+    ],
+    "graph": {
+        "xAxis": "liquid",
+        "yAxis": "avg",
+        "xLabel": "Liquid Type",
+        "yLabel": "Flow Time (s)",
+        "title": "Flow Time Comparison",
+        "type": "bar"
+    },
+    "calculations": {
+        "method": "relative-ratio",
+        "formulaToApply": "η2 = η1 * (ρ2 * t2) / (ρ1 * t1)",
+        "knowns": {
+            "η1": 0.89,
+            "ρ1": 0.997,
+            "ρ2": 0.789
+        },
+        "solveFor": "η2"
+    }
+}

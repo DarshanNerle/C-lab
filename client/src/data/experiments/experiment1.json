@@ -1,0 +1,78 @@
+{
+    "id": "experiment1",
+    "title": "Conductometric Titration of Strong Acid vs Strong Base",
+    "aim": "To determine the strength of a strong acid (HCl) by titrating it against a strong base (NaOH) using conductometry.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "45 mins",
+    "apparatus": [
+        "Conductivity meter",
+        "Burette (50 mL)",
+        "Beaker (250 mL)",
+        "Pipette (20 mL)",
+        "Magnetic stirrer",
+        "Stirring bar",
+        "Clamp stand",
+        "Wash bottle"
+    ],
+    "chemicals": [
+        "0.1N Hydrochloric acid (HCl)",
+        "0.1N Sodium hydroxide (NaOH)",
+        "Distilled water"
+    ],
+    "theory": "The titration of a strong acid (e.g., HCl) with a strong base (e.g., NaOH) follows the neutralization reaction: HCl + NaOH → NaCl + H2O. Since HCl and NaOH are strong electrolytes, they dissociate completely in water. As NaOH is added to HCl, the highly mobile H+ ions are replaced by less mobile Na+ ions, causing a decrease in conductivity. After reaching the equivalence point, the addition of excess NaOH leads to an increase in conductivity due to the addition of Na+ and OH- ions.",
+    "procedure": [
+        "Pipette out 20 mL of HCl into a 250 mL beaker.",
+        "Add enough distilled water to submerge the conductivity probe.",
+        "Fill the burette with 0.1N NaOH solution.",
+        "Place the beaker on a magnetic stirrer and insert the stirring bar.",
+        "Place the conductivity probe into the beaker and start stirring gently.",
+        "Record the initial conductivity.",
+        "Add 0.5 mL of NaOH from the burette and record the conductivity.",
+        "Continue adding NaOH in 0.5 mL increments and recording conductivity until the values show a significant increase.",
+        "Plot a graph of conductivity versus volume of NaOH added."
+    ],
+    "formula": "N1V1 = N2V2",
+    "requiredFormula": {
+        "normalization": "N1V1 = N2V2",
+        "description": "Where N1 = Normality of Acid, V1 = Volume of Acid, N2 = Normality of Base, V2 = Volume of Base (at equivalence point)."
+    },
+    "safety": [
+        "Handle HCl and NaOH with care as they are corrosive.",
+        "Wear safety goggles and lab coat.",
+        "In case of skin contact, wash immediately with plenty of water.",
+        "Ensure the conductivity meter is calibrated before use."
+    ],
+    "observationTableStructure": [
+        {
+            "key": "trial",
+            "label": "Trial No."
+        },
+        {
+            "key": "volume",
+            "label": "Volume of NaOH (mL)",
+            "unit": "mL"
+        },
+        {
+            "key": "conductivity",
+            "label": "Conductivity (mS/cm)",
+            "unit": "mS/cm"
+        }
+    ],
+    "graph": {
+        "xAxis": "volume",
+        "yAxis": "conductivity",
+        "xLabel": "Volume of NaOH (mL)",
+        "yLabel": "Conductivity (mS/cm)",
+        "title": "Conductivity vs Volume",
+        "type": "scatter-line"
+    },
+    "calculations": {
+        "findEquivalencePoint": "intersection",
+        "formulaToApply": "N1 * V1 = N2 * V2",
+        "knowns": {
+            "V1": 20,
+            "N2": 0.1
+        },
+        "solveFor": "N1"
+    }
+}

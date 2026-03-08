@@ -30,6 +30,8 @@ class SoundManager {
             pour: { src: '/sounds/pour.mp3', loop: true, category: 'lab' },
             flame: { src: '/sounds/burner.mp3', loop: true, category: 'lab' },
             bubbles: { src: '/sounds/bubbles.mp3', loop: true, category: 'lab' },
+            stirring: { src: '/sounds/stirring.mp3', loop: true, volume: 0.35, category: 'lab' },
+            gas_release: { src: '/sounds/gas-release.mp3', category: 'lab' },
             clink: { src: '/sounds/glass-clink.mp3', category: 'ui' },
             drop: { src: '/sounds/droplet.mp3', category: 'ui' },
             success: { src: '/sounds/success.mp3', category: 'ui' },

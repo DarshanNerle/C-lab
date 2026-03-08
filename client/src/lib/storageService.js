@@ -4,7 +4,8 @@ const LOCAL_KEYS = {
     user: 'app_user',
     settings: 'app_settings',
     labState: 'app_labState',
-    aiHistory: 'app_aiHistory'
+    aiHistory: 'app_aiHistory',
+    experiments: 'app_experiments'
 };
 
 const REQUEST_TIMEOUT_MS = 7000;
@@ -59,7 +60,7 @@ class StorageService {
     shouldFallback(error) {
         if (!error) return false;
         if (error.kind === 'timeout' || error.kind === 'network' || error.kind === 'no_response') return true;
-        if (error.kind === 'http' && Number(error.status) >= 500) return true;
+        if (error.kind === 'http' && (Number(error.status) >= 500 || Number(error.status) === 404)) return true;
         return false;
     }
 
@@ -106,6 +107,7 @@ class StorageService {
         const settingsMap = this.readMap(LOCAL_KEYS.settings);
         const labMap = this.readMap(LOCAL_KEYS.labState);
         const historyMap = this.readMap(LOCAL_KEYS.aiHistory);
+        const experimentsMap = this.readMap(LOCAL_KEYS.experiments);
 
         const base = userMap.byEmail[email];
         if (!base) return null;
@@ -118,7 +120,8 @@ class StorageService {
                 ...(settingsMap.byEmail[email] || {})
             },
             currentLabState: labMap.byEmail[email] || base.currentLabState || null,
-            aiHistory: Array.isArray(historyMap.byEmail[email]) ? historyMap.byEmail[email] : (Array.isArray(base.aiHistory) ? base.aiHistory : [])
+            aiHistory: Array.isArray(historyMap.byEmail[email]) ? historyMap.byEmail[email] : (Array.isArray(base.aiHistory) ? base.aiHistory : []),
+            experiments: Array.isArray(experimentsMap.byEmail[email]) ? experimentsMap.byEmail[email] : (Array.isArray(base.experiments) ? base.experiments : [])
         };
 
         return merged;
@@ -178,6 +181,42 @@ class StorageService {
         return next;
     }
 
+    saveLocalExperiments(email, experiments = []) {
+        const experimentsMap = this.readMap(LOCAL_KEYS.experiments);
+        const safeExperiments = Array.isArray(experiments) ? experiments.slice(0, 300) : [];
+        experimentsMap.byEmail[email] = safeExperiments;
+        this.writeMap(LOCAL_KEYS.experiments, experimentsMap);
+        this.saveLocalUserRecord(email, { experiments: safeExperiments });
+        return safeExperiments;
+    }
+
+    upsertLocalExperiment(email, experiment = {}) {
+        const experimentsMap = this.readMap(LOCAL_KEYS.experiments);
+        const current = Array.isArray(experimentsMap.byEmail[email]) ? [...experimentsMap.byEmail[email]] : [];
+        const index = current.findIndex((item) => item?.id === experiment?.id);
+        if (index >= 0) {
+            current[index] = { ...current[index], ...experiment };
+        } else {
+            current.unshift(experiment);
+        }
+        return this.saveLocalExperiments(email, current);
+    }
+
+    updateLocalExperimentProgress(email, experimentId, progress = {}) {
+        const experimentsMap = this.readMap(LOCAL_KEYS.experiments);
+        const current = Array.isArray(experimentsMap.byEmail[email]) ? [...experimentsMap.byEmail[email]] : [];
+        const index = current.findIndex((item) => item?.id === experimentId);
+        if (index < 0) return this.saveLocalExperiments(email, current);
+        current[index] = {
+            ...current[index],
+            progress: {
+                ...(current[index]?.progress || {}),
+                ...(progress || {})
+            }
+        };
+        return this.saveLocalExperiments(email, current);
+    }
+
     createTimeoutController(timeoutMs = REQUEST_TIMEOUT_MS) {
         const controller = new AbortController();
         const timerId = setTimeout(() => controller.abort(), timeoutMs);
@@ -233,7 +272,7 @@ class StorageService {
 
         if (this.storageMode !== STORAGE_MODES.LOCAL) {
             try {
-                const data = await this.request(`/api/user/get?email=${encodeURIComponent(normalizedEmail)}`);
+                const data = await this.request(`/api/users/get?email=${encodeURIComponent(normalizedEmail)}`);
                 if (data?.user) {
                     this.setStorageMode(STORAGE_MODES.MONGO);
                     this.saveLocalUserRecord(normalizedEmail, data.user);
@@ -243,6 +282,9 @@ class StorageService {
                         const historyMap = this.readMap(LOCAL_KEYS.aiHistory);
                         historyMap.byEmail[normalizedEmail] = data.user.aiHistory.slice(0, 50);
                         this.writeMap(LOCAL_KEYS.aiHistory, historyMap);
+                    }
+                    if (Array.isArray(data.user.experiments)) {
+                        this.saveLocalExperiments(normalizedEmail, data.user.experiments);
                     }
                     return { user: data.user, source: data.source || 'mongodb', storageMode: STORAGE_MODES.MONGO };
                 }
@@ -266,7 +308,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/create', {
+                    const data = await this.request('/api/users/create', {
                         method: 'POST',
                         body: { email: normalizedEmail, name: safeName }
                     });
@@ -300,7 +342,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/update', {
+                    const data = await this.request('/api/users/update', {
                         method: 'POST',
                         body: payload
                     });
@@ -341,7 +383,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/update-settings', {
+                    const data = await this.request('/api/users/update-settings', {
                         method: 'PATCH',
                         body: { email: normalizedEmail, settings: payload }
                     });
@@ -367,7 +409,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/save-lab', {
+                    const data = await this.request('/api/users/save-lab', {
                         method: 'POST',
                         body: { email: normalizedEmail, labState }
                     });
@@ -401,7 +443,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/save-ai-history', {
+                    const data = await this.request('/api/users/save-ai-history', {
                         method: 'POST',
                         body: { email: normalizedEmail, question: safeQuestion, answer: safeAnswer }
                     });
@@ -430,7 +472,7 @@ class StorageService {
         return this.dedupeWrite(writeKey, async () => {
             if (this.storageMode !== STORAGE_MODES.LOCAL) {
                 try {
-                    const data = await this.request('/api/user/add-xp', {
+                    const data = await this.request('/api/users/add-xp', {
                         method: 'POST',
                         body: { email: normalizedEmail, amount: safeAmount }
                     });
@@ -454,6 +496,84 @@ class StorageService {
         });
     }
 
+    async getExperiments(email) {
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+        if (!normalizedEmail) return { experiments: [], source: 'local', storageMode: this.storageMode };
+
+        if (this.storageMode !== STORAGE_MODES.LOCAL) {
+            try {
+                const data = await this.request(`/api/users/get-experiments?email=${encodeURIComponent(normalizedEmail)}`);
+                const experiments = Array.isArray(data?.experiments) ? data.experiments : [];
+                this.setStorageMode(STORAGE_MODES.MONGO);
+                this.saveLocalExperiments(normalizedEmail, experiments);
+                return { experiments, source: data?.source || 'mongodb', storageMode: STORAGE_MODES.MONGO };
+            } catch (error) {
+                if (!this.shouldFallback(error)) throw new Error(error?.message || 'Failed to load experiments');
+                this.setStorageMode(STORAGE_MODES.LOCAL);
+            }
+        }
+
+        const experimentsMap = this.readMap(LOCAL_KEYS.experiments);
+        const experiments = Array.isArray(experimentsMap.byEmail[normalizedEmail]) ? experimentsMap.byEmail[normalizedEmail] : [];
+        return { experiments, source: 'local', storageMode: STORAGE_MODES.LOCAL };
+    }
+
+    async saveExperiment({ email, experiment }) {
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+        if (!normalizedEmail || !experiment || typeof experiment !== 'object') {
+            return { ok: false, source: 'local', storageMode: this.storageMode };
+        }
+
+        const writeKey = `saveExperiment:${normalizedEmail}:${JSON.stringify(experiment || {})}`;
+        return this.dedupeWrite(writeKey, async () => {
+            if (this.storageMode !== STORAGE_MODES.LOCAL) {
+                try {
+                    const data = await this.request('/api/users/save-experiment', {
+                        method: 'POST',
+                        body: { email: normalizedEmail, experiment }
+                    });
+                    this.setStorageMode(STORAGE_MODES.MONGO);
+                    this.upsertLocalExperiment(normalizedEmail, experiment);
+                    return { ok: true, source: data?.source || 'mongodb', storageMode: STORAGE_MODES.MONGO };
+                } catch (error) {
+                    if (!this.shouldFallback(error)) return { ok: false, error: error?.message || 'Failed to save experiment', source: 'mongo', storageMode: STORAGE_MODES.MONGO };
+                    this.setStorageMode(STORAGE_MODES.LOCAL);
+                }
+            }
+
+            this.upsertLocalExperiment(normalizedEmail, experiment);
+            return { ok: true, source: 'local', storageMode: STORAGE_MODES.LOCAL };
+        });
+    }
+
+    async updateExperimentProgress({ email, experimentId, progress }) {
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+        if (!normalizedEmail || !experimentId) {
+            return { ok: false, source: 'local', storageMode: this.storageMode };
+        }
+
+        const writeKey = `saveExperimentProgress:${normalizedEmail}:${experimentId}:${JSON.stringify(progress || {})}`;
+        return this.dedupeWrite(writeKey, async () => {
+            if (this.storageMode !== STORAGE_MODES.LOCAL) {
+                try {
+                    const data = await this.request('/api/users/update-experiment-progress', {
+                        method: 'PATCH',
+                        body: { email: normalizedEmail, experimentId, progress }
+                    });
+                    this.setStorageMode(STORAGE_MODES.MONGO);
+                    this.updateLocalExperimentProgress(normalizedEmail, experimentId, progress);
+                    return { ok: true, source: data?.source || 'mongodb', storageMode: STORAGE_MODES.MONGO };
+                } catch (error) {
+                    if (!this.shouldFallback(error)) return { ok: false, error: error?.message || 'Failed to save progress', source: 'mongo', storageMode: STORAGE_MODES.MONGO };
+                    this.setStorageMode(STORAGE_MODES.LOCAL);
+                }
+            }
+
+            this.updateLocalExperimentProgress(normalizedEmail, experimentId, progress);
+            return { ok: true, source: 'local', storageMode: STORAGE_MODES.LOCAL };
+        });
+    }
+
     clearUser(email) {
         const normalizedEmail = String(email || '').trim().toLowerCase();
         if (!normalizedEmail) {
@@ -462,7 +582,7 @@ class StorageService {
             return;
         }
 
-        [LOCAL_KEYS.user, LOCAL_KEYS.settings, LOCAL_KEYS.labState, LOCAL_KEYS.aiHistory].forEach((key) => {
+        [LOCAL_KEYS.user, LOCAL_KEYS.settings, LOCAL_KEYS.labState, LOCAL_KEYS.aiHistory, LOCAL_KEYS.experiments].forEach((key) => {
             const map = this.readMap(key);
             if (map.byEmail[normalizedEmail]) {
                 delete map.byEmail[normalizedEmail];

@@ -1,0 +1,82 @@
+{
+    "id": "experiment3",
+    "title": "pH Titration of Weak Acid vs Strong Base",
+    "aim": "To determine the strength and pKa of a weak acid (Acetic acid) by titrating it against a strong base (NaOH) using a pH meter.",
+    "difficulty": "Advanced",
+    "estimatedTime": "60 mins",
+    "apparatus": [
+        "pH meter",
+        "Burette (50 mL)",
+        "Beaker (100 mL)",
+        "Pipette (10 mL)",
+        "Magnetic stirrer",
+        "Magnetic bead",
+        "Universal stand",
+        "Wash bottle"
+    ],
+    "chemicals": [
+        "0.1M Acetic acid (CH3COOH)",
+        "0.1M Sodium hydroxide (NaOH)",
+        "Buffer solutions (pH 4, 7, 9) for calibration",
+        "Phenolphthalein indicator (optional)",
+        "Distilled water"
+    ],
+    "theory": "When a weak acid is titrated with a strong base, the pH change is gradual initially, followed by a sharp increase at the equivalence point. The neutralization reaction is: CH3COOH + NaOH → CH3COONa + H2O. At the half-equivalence point, the pH of the solution is approximately equal to the pKa of the weak acid (Henderson-Hasselbalch equation). The equivalence point pH will be > 7 due to salt hydrolysis.",
+    "procedure": [
+        "Calibrate the pH meter using pH 4, 7, and 9 buffer solutions.",
+        "Pipette out 10 mL of 0.1M Acetic acid into a clean 100 mL beaker.",
+        "Add enough distilled water (approx 30 mL) so the pH electrode is properly submerged.",
+        "Fill the burette with 0.1M NaOH solution and fix it to the stand.",
+        "Place the beaker on the magnetic stirrer and start stirring slowly.",
+        "Insert the pH electrode into the beaker, ensuring it doesn't touch the magnetic bead.",
+        "Record the initial pH of the acid.",
+        "Add NaOH in 0.5 mL increments from the burette and record the pH after each addition.",
+        "Near the expected equivalence point (around 8-12 mL), add NaOH in 0.1 mL increments.",
+        "Continue adding NaOH until the pH reaches around 12.",
+        "Plot pH vs Volume of NaOH and d(pH)/d(V) vs Volume to find the exact equivalence point."
+    ],
+    "formula": "N1V1 = N2V2",
+    "requiredFormula": {
+        "normalization": "pH = pKa + log([Salt]/[Acid])",
+        "description": "At half-equivalence point, [Salt]=[Acid], so pH = pKa."
+    },
+    "safety": [
+        "Acetic acid has a pungent smell; handle in a well-ventilated space.",
+        "NaOH is corrosive; avoid skin contact.",
+        "Handle pH electrode with extreme care; it is fragile and expensive.",
+        "Store electrode in storage solution when not in use."
+    ],
+    "observationTableStructure": [
+        {
+            "key": "trial",
+            "label": "Trial No."
+        },
+        {
+            "key": "volume",
+            "label": "Volume of NaOH (mL)",
+            "unit": "mL"
+        },
+        {
+            "key": "ph",
+            "label": "pH Reading",
+            "unit": "pH"
+        }
+    ],
+    "graph": {
+        "xAxis": "volume",
+        "yAxis": "ph",
+        "xLabel": "Volume of NaOH (mL)",
+        "yLabel": "pH Value",
+        "title": "pH vs Volume Titration Curve",
+        "type": "sigmoid"
+    },
+    "calculations": {
+        "findEquivalencePoint": "sigmoid-inflection",
+        "formulaToApply": "N1 * V1 = N2 * V2",
+        "knowns": {
+            "V1": 10,
+            "N2": 0.1
+        },
+        "solveFor": "N1"
+    }
+}
