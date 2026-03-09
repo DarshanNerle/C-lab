@@ -18,53 +18,25 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-let app;
-try {
-    app = initializeApp(firebaseConfig);
-} catch (e) {
-    console.error("Firebase Initialization failed:", e);
-    app = { options: firebaseConfig }; // Fallback minimal app object
+// Validate config before initialization to prevent cryptic errors
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes('undefined')) {
+    console.error("CRITICAL: Firebase API Key is missing. Check your .env file and Vercel environment variables.");
 }
 
-export const analytics = typeof window !== 'undefined' ? (async () => {
-    try {
-        return await getAnalytics(app);
-    } catch (e) {
-        console.warn("Firebase Analytics failed to initialize. Skipping.");
-        return null;
-    }
-})() : null;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-export const auth = (() => {
-    try {
-        return initializeAuth(app, {
-            persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence]
-        });
-    } catch (e) {
-        console.error("Firebase Auth failed to initialize:", e);
-        return { app }; // Minimal mock auth
-    }
-})();
+// Initialize Services
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
-// Modern Firestore Initialization with resilient cache settings
-export const db = (() => {
-    try {
-        return initializeFirestore(app, {
-            localCache: persistentLocalCache({
-                tabManager: persistentMultipleTabManager()
-            })
-        });
-    } catch (e) {
-        console.error("Firestore failed to initialize:", e);
-        return null;
-    }
-})();
+export const auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence]
+});
 
-export const storage = (() => {
-    try {
-        return getStorage(app);
-    } catch (e) {
-        return null;
-    }
-})();
+export const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+    })
+});
+
+export const storage = getStorage(app);
