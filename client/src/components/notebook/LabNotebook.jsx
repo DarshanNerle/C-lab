@@ -122,7 +122,8 @@ export default function LabNotebook() {
 
     // Firebase Auto-save Logic
     useEffect(() => {
-        if (!user || !activeEntryId || activeEntryId === 'none') return;
+        // Essential: only sync if user has a Firebase UID and there is an active session
+        if (!user || !user.uid || !activeEntryId || activeEntryId === 'none') return;
 
         const saveToFirebase = async () => {
             try {

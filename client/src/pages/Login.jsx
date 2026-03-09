@@ -1,57 +1,31 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { loginUser } from '../firebase/auth'
-import { storageService } from '../lib/storageService'
-import useAuthStore from '../store/useAuthStore'
 
 export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
-    const [isMisconfigured, setIsMisconfigured] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate()
-    const { setUser } = useAuthStore()
 
     const handleLogin = async (e) => {
         e.preventDefault()
         setError('')
         setIsLoading(true)
-        setIsMisconfigured(false)
         
         try {
             await loginUser(email, password)
             navigate('/dashboard')
         } catch (err) {
-            if (err.message === 'FIREBASE_MISCONFIGURED') {
-                setError('Identity Service (Firebase) is not enabled or configured correctly in your Google Console.')
-                setIsMisconfigured(true)
+            console.error("Login attempt failed:", err);
+            if (err.message === 'FIREBASE_MISCONFIGURED' || err.code?.includes('configuration-not-found')) {
+                setError('CRITICAL: Firebase Configuration Mismatch. Please ensure your .env matching IDs (App ID, Sender ID) match your API Key.')
+            } else if (err.message?.includes('identitytoolkit')) {
+                setError('ACTION REQUIRED: Please enable "Identity Toolkit API" in your Google Cloud Console.')
             } else {
-                setError(err.message || 'Failed to authenticate clearance')
+                setError(err.message || 'Login failed. Check credentials.')
             }
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const handleLocalLogin = async () => {
-        setIsLoading(true)
-        setError('')
-        try {
-            // Attempt to get or create user in our own backend/local store directly 
-            // bypassing Firebase Auth since it is misconfigured
-            const data = await storageService.getUser(email)
-            if (data.user) {
-                setUser({ email, isLocalOnly: true }, data.user, data.source, data.storageMode)
-                navigate('/dashboard')
-            } else {
-                // If user doesn't exist, create a temporary local one
-                const createData = await storageService.saveUser({ email, name: email.split('@')[0] })
-                setUser({ email, isLocalOnly: true }, createData.user, createData.source, createData.storageMode)
-                navigate('/dashboard')
-            }
-        } catch (err) {
-            setError('Local database access failed: ' + (err.message || 'Unknown error'))
         } finally {
             setIsLoading(false)
         }
@@ -59,65 +33,55 @@ export default function Login() {
 
     return (
         <div className="flex-1 flex items-center justify-center p-6">
-            <div className="glass-card p-8 rounded-xl w-full max-w-md">
-                <h2 className="text-3xl font-bold text-center mb-2 text-white">Access Lab</h2>
-                <p className="text-gray-400 text-sm text-center mb-6">Enter your clearance credentials</p>
+            <div className="glass-card p-10 rounded-2xl w-full max-w-md border border-white/5 bg-slate-900/50 backdrop-blur-xl">
+                <div className="flex justify-center mb-6">
+                    <div className="w-16 h-16 bg-neon-blue/10 rounded-full flex items-center justify-center border border-neon-blue/30 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
+                        <span className="text-2xl">🧪</span>
+                    </div>
+                </div>
+                
+                <h2 className="text-3xl font-black text-center mb-2 text-white uppercase tracking-tight">Clearance Access</h2>
+                <p className="text-gray-400 text-xs text-center mb-8 uppercase tracking-[0.2em] font-bold">C-LAB Security Protocol</p>
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-200 text-sm text-center animate-pulse">
+                    <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-100 text-[11px] leading-relaxed text-center font-bold">
                         {error}
                     </div>
                 )}
 
-                <form className="flex flex-col gap-4" onSubmit={handleLogin}>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Email</label>
+                <form className="flex flex-col gap-6" onSubmit={handleLogin}>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest px-1">Researcher Email</label>
                         <input
                             type="email"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition-all"
-                            placeholder="scientist@c-lab.com"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-neon-blue transition-all"
+                            placeholder="scientist@c-lab.ai"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ml-1">Password</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest px-1">Lab Password</label>
                         <input
                             type="password"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition-all"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-neon-blue transition-all"
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
-                    
-                    {!isMisconfigured ? (
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="mt-4 px-6 py-4 rounded-xl font-bold bg-neon-blue text-black shadow-[0_0_20px_rgba(0,255,255,0.3)] hover:shadow-[0_0_30px_rgba(0,255,255,0.5)] active:scale-95 transition-all disabled:opacity-50">
-                            {isLoading ? 'Authenticating...' : 'Standard Login'}
-                        </button>
-                    ) : (
-                        <div className="flex flex-col gap-3 mt-2">
-                            <button
-                                type="button"
-                                onClick={handleLocalLogin}
-                                disabled={isLoading}
-                                className="px-6 py-4 rounded-xl font-bold bg-amber-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] active:scale-95 transition-all">
-                                Use Local Clearance (Skip Google/Firebase)
-                            </button>
-                            <p className="text-[10px] text-gray-400 text-center italic">
-                                Use this option if you are having issues with the Google Cloud configuration.
-                            </p>
-                        </div>
-                    )}
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="mt-4 px-6 py-4 rounded-xl font-black bg-neon-blue text-black shadow-[0_0_25px_rgba(0,255,255,0.4)] hover:shadow-[0_0_40px_rgba(0,255,255,0.6)] active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest text-xs">
+                        {isLoading ? 'Decrypting...' : 'Initialize Session'}
+                    </button>
                 </form>
                 
-                <p className="mt-8 text-center text-gray-500 text-xs">
-                    Don't have clearance? <Link to="/register" className="text-neon-blue hover:text-white transition-colors">Register Account</Link>
+                <p className="mt-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                    No clearance? <Link to="/register" className="text-neon-blue hover:text-white transition-colors underline underline-offset-4">Apply for Access</Link>
                 </p>
             </div>
         </div>
